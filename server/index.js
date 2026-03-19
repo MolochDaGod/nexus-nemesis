@@ -46,6 +46,27 @@ app.use((req, res, next) => {
   next();
 });
 
+// Favicon (prevent 404 noise)
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
+// Root — API info
+app.get('/', (req, res) => {
+  res.json({
+    service: 'Nexus Nemesis',
+    season: 'Season 0',
+    supply: 100000,
+    docs: '/api/health',
+    endpoints: [
+      'GET  /api/health',
+      'GET  /api/nexus/stats',
+      'GET  /api/nexus/cards/:grudgeId',
+      'GET  /api/nexus/card/:uuid',
+      'POST /api/nexus/pack/buy',
+      'POST /api/nexus/webhook',
+    ],
+  });
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', service: 'nexus-nemesis', season: 'Season 0' });

@@ -7,7 +7,9 @@
     }
   ],
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api" }
+    { "source": "/api/(.*)", "destination": "/api" },
+    { "source": "/favicon.ico", "destination": "/api" },
+    { "source": "/", "destination": "/api" }
   ],
   "env": {
     "VERCEL": "1"
