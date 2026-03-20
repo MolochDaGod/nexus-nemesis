@@ -38,6 +38,7 @@ const ALLOWED_ORIGINS = [
   'https://grudgewarlords.com',
   'https://grudge-warlords-game.vercel.app',
   'https://grudge-studio.com',
+  'https://nexus.grudge-studio.com',
   'https://dash.grudge-studio.com',
 ];
 // Also allow any *.vercel.app preview deploy + localhost for dev
