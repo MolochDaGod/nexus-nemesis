@@ -130,9 +130,9 @@ async function run() {
             );
 
             await pool.query(
-              `INSERT INTO nexus_mint_log (card_id, crossmint_action_id, crossmint_status, admin_wallet)
+              `INSERT INTO nexus_mint_log (card_id, crossmint_action_id, crossmint_status, recipient_wallet)
                VALUES ($1, $2, 'pending', $3)
-               ON CONFLICT (card_id) DO UPDATE SET crossmint_action_id = $2, crossmint_status = 'pending'`,
+               ON CONFLICT (card_id) DO UPDATE SET crossmint_action_id = $2, crossmint_status = 'pending', recipient_wallet = $3`,
               [card.id, result.actionId, process.env.ADMIN_WALLET_ADDRESS]
             );
 
@@ -152,7 +152,7 @@ async function run() {
           [card.id]
         );
         await pool.query(
-          `INSERT INTO nexus_mint_log (card_id, crossmint_status, admin_wallet, error_message)
+          `INSERT INTO nexus_mint_log (card_id, crossmint_status, recipient_wallet, error_message)
            VALUES ($1, 'failed', $2, $3)
            ON CONFLICT (card_id) DO UPDATE SET crossmint_status = 'failed', error_message = $3`,
           [card.id, process.env.ADMIN_WALLET_ADDRESS, lastErr.message]

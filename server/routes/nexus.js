@@ -121,10 +121,10 @@ module.exports = function createNexusRouter(pool) {
 
           // Log the mint action
           await pool.query(
-            `INSERT INTO nexus_mint_log (card_id, crossmint_action_id, crossmint_status, admin_wallet)
+            `INSERT INTO nexus_mint_log (card_id, crossmint_action_id, crossmint_status, recipient_wallet)
              VALUES ($1, $2, 'pending', $3)
              ON CONFLICT (card_id) DO UPDATE
-             SET crossmint_action_id = $2, crossmint_status = 'pending'`,
+             SET crossmint_action_id = $2, crossmint_status = 'pending', recipient_wallet = $3`,
             [card.id, result.actionId, wallet || email]
           );
 
