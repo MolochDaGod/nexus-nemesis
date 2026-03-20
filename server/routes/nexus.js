@@ -1,19 +1,29 @@
-// Nexus Nemesis — Card & Pack API Routes
+// Nexus Nemesis — Card & Pack API Routes (Mint-on-Demand)
 const { Router } = require('express');
 const crypto = require('crypto');
+const fetch = require('node-fetch');
 const { v4: uuidv4 } = require('uuid');
 const { PACK_CONFIG, PACK_TRIBE_WEIGHTS, TRIBES, rollTraits, rollBonusAbilities } = require('../lib/tribe-config');
+const { mintCardToRecipient } = require('../lib/crossmint');
 
 module.exports = function createNexusRouter(pool) {
   const router = Router();
 
   // ── POST /api/nexus/pack/buy ───────────────────────────────────
-  // Buy and open a pack, assigning cards to the user
+  // Buy a pack → assign cards → mint cNFTs directly to buyer
+  //
+  // Body: { grudgeId, packType, wallet?, email? }
+  //   wallet = Solana address (direct mint)
+  //   email  = creates Crossmint custodial wallet
+  //   At least one of wallet/email is required.
   router.post('/pack/buy', async (req, res) => {
-    const { grudgeId, packType } = req.body;
+    const { grudgeId, packType, wallet, email } = req.body;
 
     if (!grudgeId || !packType) {
       return res.status(400).json({ error: 'grudgeId and packType required' });
+    }
+    if (!wallet && !email) {
+      return res.status(400).json({ error: 'wallet (Solana address) or email required for minting' });
     }
 
     const config = PACK_CONFIG[packType];
@@ -25,21 +35,18 @@ module.exports = function createNexusRouter(pool) {
     try {
       await client.query('BEGIN');
 
-      // TODO: Check GBUX balance via blockchain API
-      // For now, we trust the caller has verified payment
+      // TODO: Verify GBUX payment on-chain before proceeding
 
       // Select random unassigned cards with tribe weighting
-      // We pick from the pre-generated pool where mint_status IN ('unminted', 'minted')
-      // and owner_grudge_id IS NULL
       const weights = PACK_TRIBE_WEIGHTS[packType];
       const tribeOrder = Object.entries(weights).sort((a, b) => b[1] - a[1]);
 
-      const selectedCards = [];
+      const selectedCardIds = [];
       let remaining = config.cards;
 
       for (const [tribe, weight] of tribeOrder) {
         const count = Math.max(
-          remaining === config.cards ? 1 : 0, // at least 1 of top tribe
+          remaining === config.cards ? 1 : 0,
           Math.round(remaining * (weight / tribeOrder.reduce((s, [, w]) => s + w, 0)))
         );
         if (count === 0) continue;
@@ -53,12 +60,12 @@ module.exports = function createNexusRouter(pool) {
           [tribe, Math.min(count, remaining)]
         );
 
-        selectedCards.push(...rows.map(r => r.id));
+        selectedCardIds.push(...rows.map(r => r.id));
         remaining -= rows.length;
         if (remaining <= 0) break;
       }
 
-      // If still need more cards (edge case), grab any unassigned
+      // Fallback: grab any unassigned cards if tribe selection fell short
       if (remaining > 0) {
         const { rows } = await client.query(
           `SELECT id FROM nexus_cards
@@ -68,20 +75,23 @@ module.exports = function createNexusRouter(pool) {
            FOR UPDATE SKIP LOCKED`,
           [remaining]
         );
-        selectedCards.push(...rows.map(r => r.id));
+        selectedCardIds.push(...rows.map(r => r.id));
       }
 
-      if (selectedCards.length === 0) {
+      if (selectedCardIds.length === 0) {
         await client.query('ROLLBACK');
         return res.status(503).json({ error: 'No cards available. Season 0 may be sold out!' });
       }
 
-      // Assign cards to user
+      // Assign cards to user + mark as minting
       await client.query(
         `UPDATE nexus_cards
-         SET owner_grudge_id = $1, mint_status = 'assigned', assigned_at = NOW()
-         WHERE id = ANY($2)`,
-        [grudgeId, selectedCards]
+         SET owner_grudge_id = $1,
+             owner_wallet = $2,
+             mint_status = 'minting',
+             assigned_at = NOW()
+         WHERE id = ANY($3)`,
+        [grudgeId, wallet || null, selectedCardIds]
       );
 
       // Log pack purchase
@@ -89,16 +99,65 @@ module.exports = function createNexusRouter(pool) {
       await client.query(
         `INSERT INTO nexus_packs (id, grudge_id, pack_type, gbux_cost, cards)
          VALUES ($1, $2, $3, $4, $5)`,
-        [packId, grudgeId, packType, config.cost, selectedCards]
+        [packId, grudgeId, packType, config.cost, selectedCardIds]
       );
 
       await client.query('COMMIT');
 
-      // Fetch full card details
+      // Fetch full card rows for minting
       const { rows: cards } = await pool.query(
         `SELECT * FROM nexus_cards WHERE id = ANY($1)`,
-        [selectedCards]
+        [selectedCardIds]
       );
+
+      // Mint cNFTs directly to buyer (async — don't block response)
+      const recipient = { wallet, email };
+      const mintResults = [];
+
+      // Fire all mints in parallel (10 cards max per pack)
+      const mintPromises = cards.map(async (card) => {
+        try {
+          const result = await mintCardToRecipient(card, recipient);
+
+          // Log the mint action
+          await pool.query(
+            `INSERT INTO nexus_mint_log (card_id, crossmint_action_id, crossmint_status, admin_wallet)
+             VALUES ($1, $2, 'pending', $3)
+             ON CONFLICT (card_id) DO UPDATE
+             SET crossmint_action_id = $2, crossmint_status = 'pending'`,
+            [card.id, result.actionId, wallet || email]
+          );
+
+          // Update card with crossmint action ID
+          await pool.query(
+            `UPDATE nexus_cards SET crossmint_id = $1 WHERE id = $2`,
+            [result.actionId, card.id]
+          );
+
+          mintResults.push({ cardId: card.id, actionId: result.actionId, status: result.alreadyMinted ? 'existing' : 'pending' });
+        } catch (err) {
+          console.error(`Mint failed for card ${card.id}:`, err.message);
+          // Revert to assigned (not minting) so it can be retried
+          await pool.query(
+            `UPDATE nexus_cards SET mint_status = 'assigned' WHERE id = $1`,
+            [card.id]
+          );
+          mintResults.push({ cardId: card.id, status: 'failed', error: err.message });
+        }
+      });
+
+      await Promise.allSettled(mintPromises);
+
+      // Notify Discord
+      if (process.env.DISCORD_WEBHOOK_CARDOPEN) {
+        fetch(process.env.DISCORD_WEBHOOK_CARDOPEN, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: `Pack opened! ${packType} pack by ${grudgeId} — ${cards.length} cards minting to ${wallet || email}`,
+          }),
+        }).catch(() => {});
+      }
 
       res.json({
         packId,
@@ -106,6 +165,7 @@ module.exports = function createNexusRouter(pool) {
         gbuxCost: config.cost,
         cardsReceived: cards.length,
         cards: cards.map(formatCard),
+        minting: mintResults,
       });
     } catch (err) {
       await client.query('ROLLBACK');
@@ -222,12 +282,12 @@ module.exports = function createNexusRouter(pool) {
     console.log(`[webhook] Event: ${event.type}`, event.data?.id || '');
 
     try {
-      // Handle mint success events
+      // Handle mint success — cNFT is now on-chain in buyer's wallet
       if (event.type === 'nfts.create.succeeded') {
         const { id: crossmintId, metadata, onChain } = event.data || {};
         const txHash = onChain?.txId || null;
 
-        // Update mint log with success
+        // Update mint log
         await pool.query(
           `UPDATE nexus_mint_log
            SET crossmint_status = 'success', tx_hash = $1, completed_at = NOW()
@@ -235,25 +295,47 @@ module.exports = function createNexusRouter(pool) {
           [txHash, crossmintId]
         );
 
-        // Update card mint status
-        await pool.query(
+        // Card is now fully minted in buyer's wallet
+        const { rows } = await pool.query(
           `UPDATE nexus_cards
            SET mint_status = 'minted', crossmint_id = $1, minted_at = NOW()
-           WHERE id = (SELECT card_id FROM nexus_mint_log WHERE crossmint_action_id = $1 LIMIT 1)`,
-          [crossmintId]
+           WHERE id = (SELECT card_id FROM nexus_mint_log WHERE crossmint_action_id = $2 LIMIT 1)
+           RETURNING id, name, tribe, rarity, owner_grudge_id, owner_wallet`,
+          [crossmintId, crossmintId]
         );
 
-        // Notify Discord if configured
-        if (process.env.DISCORD_WEBHOOK_CARDS) {
-          const fetch = require('node-fetch');
+        const card = rows[0];
+        console.log(`[webhook] Minted: ${card?.name} → ${card?.owner_wallet || card?.owner_grudge_id}`);
+
+        // Notify Discord
+        if (process.env.DISCORD_WEBHOOK_CARDS && card) {
           fetch(process.env.DISCORD_WEBHOOK_CARDS, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              content: `cNFT minted! Card: ${metadata?.name || 'unknown'} | TX: ${txHash || 'pending'}`,
+              content: `cNFT minted! **${card.name}** (${card.tribe}/${card.rarity}) → ${card.owner_wallet || card.owner_grudge_id} | TX: \`${txHash || 'pending'}\``,
             }),
-          }).catch(err => console.error('Discord notify error:', err));
+          }).catch(() => {});
         }
+      }
+
+      // Handle mint failure
+      if (event.type === 'nfts.create.failed') {
+        const { id: crossmintId } = event.data || {};
+        console.error(`[webhook] Mint FAILED: ${crossmintId}`);
+
+        await pool.query(
+          `UPDATE nexus_mint_log SET crossmint_status = 'failed', completed_at = NOW()
+           WHERE crossmint_action_id = $1`,
+          [crossmintId]
+        );
+
+        // Revert card to assigned so user can retry
+        await pool.query(
+          `UPDATE nexus_cards SET mint_status = 'assigned'
+           WHERE id = (SELECT card_id FROM nexus_mint_log WHERE crossmint_action_id = $1 LIMIT 1)`,
+          [crossmintId]
+        );
       }
 
       // Handle collection events

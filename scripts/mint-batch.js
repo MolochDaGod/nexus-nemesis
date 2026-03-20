@@ -12,7 +12,7 @@
 
 require('dotenv').config();
 const { Pool } = require('pg');
-const fetch = require('node-fetch');
+const { mintCardToRecipient } = require('../server/lib/crossmint');
 
 // ── Config ───────────────────────────────────────────────────────────
 const CROSSMINT_API = 'https://www.crossmint.com/api/2022-06-09';
@@ -35,82 +35,14 @@ const DRY_RUN = args.includes('--dry-run');
 
 async function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-// ── Idempotent Template Mint ───────────────────────────────────────
-// Card UUID is the idempotent key — if you call this twice with the
-// same UUID, Crossmint returns the existing mint instead of creating
-// a duplicate. This guarantees exactly 100K unique cNFTs.
-async function mintCard(card) {
-  const collectionId = process.env.CROSSMINT_COLLECTION_ID;
-  const templateId = process.env.CROSSMINT_TEMPLATE_ID;
-
-  // Card UUID = idempotent mint ID (prevents double-mint)
-  const idempotentId = card.id;
-
-  // Metadata overrides on top of the template
-  const metadata = {
-    name: `${card.name} ${card.edition}`,
-    image: card.image_url,
-    description: card.description || `${card.name} — ${card.tribe} | ${card.rarity}`,
-    attributes: [
-      { trait_type: 'UUID', value: card.id },
-      { trait_type: 'Card Number', value: String(card.card_number) },
-      { trait_type: 'Tribe', value: card.tribe },
-      { trait_type: 'Rarity', value: card.rarity },
-      { trait_type: 'Type', value: card.type },
-      { trait_type: 'SubType', value: card.subtype },
-      { trait_type: 'Attack', value: String(card.attack) },
-      { trait_type: 'Health', value: String(card.health) },
-      { trait_type: 'Mana Cost', value: String(card.mana_cost) },
-      { trait_type: 'Abilities', value: card.abilities || 'None' },
-      { trait_type: 'Season', value: card.season },
-      { trait_type: 'Edition', value: card.edition },
-      { trait_type: 'Signature', value: card.is_signature ? 'Yes' : 'No' },
-      ...(card.traits?.life ? [{ trait_type: 'Trait: Life', value: '+1 Health' }] : []),
-      ...(card.traits?.fire ? [{ trait_type: 'Trait: Fire', value: '+1 Attack' }] : []),
-      ...(card.traits?.foil ? [{ trait_type: 'Trait: Foil', value: 'Holographic' }] : []),
-      ...(card.bonus_abilities || []).map(a => ({ trait_type: 'Bonus', value: a })),
-    ],
-  };
-
-  const body = {
-    recipient: `solana:${process.env.ADMIN_WALLET_ADDRESS}`,
-    metadata,
-    compressed: true,
-    reuploadLinkedFiles: false,
-  };
-
-  // Idempotent mint: PUT /collections/{id}/nfts/{idempotentId}
-  // Uses template as the base, overrides with our metadata
-  const url = `${CROSSMINT_API}/collections/${collectionId}/nfts/${idempotentId}`;
-
-  const res = await fetch(url, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-API-KEY': process.env.CROSSMINT_API_KEY,
-    },
-    body: JSON.stringify(body),
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    // 409 = already exists (idempotent success)
-    if (res.status === 409) {
-      return { id: idempotentId, actionId: data.actionId || idempotentId, alreadyMinted: true };
-    }
-    throw new Error(`Crossmint ${res.status}: ${JSON.stringify(data)}`);
-  }
-
-  return { id: data.id, actionId: data.actionId || data.id, alreadyMinted: false };
-}
+// Uses shared Crossmint lib for idempotent minting
 
 // ── Main ────────────────────────────────────────────────────────────
 async function run() {
   // Validate required env
   const required = [
     'CROSSMINT_API_KEY', 'CROSSMINT_COLLECTION_ID',
-    'CROSSMINT_TEMPLATE_ID', 'ADMIN_WALLET_ADDRESS', 'DATABASE_URL',
+    'ADMIN_WALLET_ADDRESS', 'DATABASE_URL',
   ];
   for (const key of required) {
     if (!process.env[key]) {
@@ -119,9 +51,8 @@ async function run() {
     }
   }
 
-  console.log('Nexus Nemesis — cNFT Batch Minter');
+  console.log('Nexus Nemesis — cNFT Batch Minter (Admin Fallback)');
   console.log(`  Collection: ${process.env.CROSSMINT_COLLECTION_ID}`);
-  console.log(`  Template:   ${process.env.CROSSMINT_TEMPLATE_ID}`);
   console.log(`  Admin:      ${process.env.ADMIN_WALLET_ADDRESS}`);
   console.log(`  Hard cap:   ${HARD_CAP.toLocaleString()}`);
   if (DRY_RUN) console.log('  MODE: DRY RUN (no actual mints)');
@@ -181,7 +112,7 @@ async function run() {
         let lastErr;
         for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
           try {
-            const result = await mintCard(card);
+            const result = await mintCardToRecipient(card, { wallet: process.env.ADMIN_WALLET_ADDRESS });
 
             if (result.alreadyMinted) {
               // Idempotent hit — already minted, just update status
