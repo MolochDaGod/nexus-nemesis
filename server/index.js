@@ -3,16 +3,20 @@ require('dotenv').config();
 const express = require('express');
 const { Pool } = require('pg');
 const createNexusRouter = require('./routes/nexus');
+const { requireAuth, optionalAuth } = require('./middleware/auth');
 
 const app = express();
 const PORT = process.env.PORT || 3100;
+const IS_SERVERLESS = process.env.VERCEL === '1';
 
-// DB pool — connects to Grudge backend
+// ── DB Pool ─────────────────────────────────────────────────────────
+// Serverless (Vercel): 1-3 connections per cold start, short timeouts
+// VPS/local: 10-20 connections, longer idle timeout
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
+  max: IS_SERVERLESS ? 2 : 15,
+  idleTimeoutMillis: IS_SERVERLESS ? 10000 : 30000,
+  connectionTimeoutMillis: IS_SERVERLESS ? 3000 : 5000,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 });
 
@@ -20,70 +24,108 @@ pool.on('error', (err) => {
   console.error('Unexpected DB pool error:', err);
 });
 
-// Raw body capture for webhook signature verification (must be before express.json)
+// ── Raw body for webhook ───────────────────────────────────────────
 app.use('/api/nexus/webhook', express.raw({ type: 'application/json' }));
 
-// Middleware
+// ── Body parser ────────────────────────────────────────────────────
 app.use(express.json());
 
-// CORS (allow game client & Vercel preview domains)
+// ── CORS (strict — reject unknown origins) ────────────────────────
 const ALLOWED_ORIGINS = [
   'https://grudgeplatform.com',
+  'https://www.grudgeplatform.com',
+  'https://grudgeplatform.io',
   'https://grudgewarlords.com',
   'https://grudge-warlords-game.vercel.app',
-  /\.vercel\.app$/,
+  'https://grudge-studio.com',
+  'https://dash.grudge-studio.com',
 ];
+// Also allow any *.vercel.app preview deploy + localhost for dev
+const ALLOWED_ORIGIN_PATTERNS = [
+  /^https:\/\/[a-z0-9-]+-grudgenexus\.vercel\.app$/,
+  /^https:\/\/nexus-nemesis[a-z0-9-]*\.vercel\.app$/,
+  /^http:\/\/localhost:\d+$/,
+];
+
+function isOriginAllowed(origin) {
+  if (!origin) return false; // Server-to-server (no origin header) — allowed by default
+  return ALLOWED_ORIGINS.includes(origin)
+    || ALLOWED_ORIGIN_PATTERNS.some(p => p.test(origin));
+}
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  const allowed = ALLOWED_ORIGINS.some(o =>
-    o instanceof RegExp ? o.test(origin) : o === origin
-  );
-  res.header('Access-Control-Allow-Origin', allowed ? origin : '*');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  if (req.method === 'OPTIONS') return res.sendStatus(204);
-  next();
+
+  if (!origin) {
+    // No origin = server-to-server or same-origin — allow
+    next();
+    return;
+  }
+
+  if (isOriginAllowed(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    if (req.method === 'OPTIONS') return res.sendStatus(204);
+    next();
+  } else {
+    // Unknown origin — reject
+    res.status(403).json({ error: 'Origin not allowed' });
+  }
 });
 
-// Favicon (prevent 404 noise)
+// ── Public routes (no auth) ───────────────────────────────────────
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 
-// Root — API info
 app.get('/', (req, res) => {
   res.json({
     service: 'Nexus Nemesis',
     season: 'Season 0',
     supply: 100000,
-    docs: '/api/health',
-    endpoints: [
-      'GET  /api/health',
-      'GET  /api/nexus/stats',
-      'GET  /api/nexus/cards/:grudgeId',
-      'GET  /api/nexus/card/:uuid',
-      'POST /api/nexus/pack/buy',
-      'POST /api/nexus/webhook',
-    ],
+    auth: 'Bearer token required for protected endpoints',
+    endpoints: {
+      public: [
+        'GET  /api/health',
+        'GET  /api/nexus/stats',
+        'GET  /api/nexus/card/:uuid',
+        'POST /api/nexus/webhook',
+      ],
+      protected: [
+        'GET  /api/nexus/cards/:grudgeId  (auth required)',
+        'POST /api/nexus/pack/buy         (auth required)',
+      ],
+    },
   });
 });
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', service: 'nexus-nemesis', season: 'Season 0' });
+app.get('/api/health', async (req, res) => {
+  // Include DB connectivity check
+  let dbOk = false;
+  try {
+    await pool.query('SELECT 1');
+    dbOk = true;
+  } catch { /* db down */ }
+  res.json({
+    status: dbOk ? 'ok' : 'degraded',
+    service: 'nexus-nemesis',
+    season: 'Season 0',
+    db: dbOk ? 'connected' : 'unreachable',
+    env: IS_SERVERLESS ? 'serverless' : 'vps',
+  });
 });
 
-// Nexus card/pack routes
-app.use('/api/nexus', createNexusRouter(pool));
+// ── Nexus routes (auth applied per-route inside) ───────────────
+app.use('/api/nexus', createNexusRouter(pool, { requireAuth, optionalAuth }));
 
-// Only listen when running directly (not on Vercel)
-if (process.env.VERCEL !== '1') {
+// ── Start (VPS only) ───────────────────────────────────────────
+if (!IS_SERVERLESS) {
   app.listen(PORT, () => {
     console.log(`Nexus Nemesis API running on port ${PORT}`);
+    console.log(`  Env:    ${IS_SERVERLESS ? 'serverless' : 'vps'}`);
+    console.log(`  DB max: ${IS_SERVERLESS ? 2 : 15} connections`);
     console.log(`  Health: http://localhost:${PORT}/api/health`);
-    console.log(`  Stats:  http://localhost:${PORT}/api/nexus/stats`);
-    console.log(`  Cards:  http://localhost:${PORT}/api/nexus/cards/:grudgeId`);
   });
 }
 
-// Export for Vercel serverless
 module.exports = app;

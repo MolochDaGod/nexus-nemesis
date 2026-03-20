@@ -6,18 +6,23 @@ const { v4: uuidv4 } = require('uuid');
 const { PACK_CONFIG, PACK_TRIBE_WEIGHTS, TRIBES, rollTraits, rollBonusAbilities } = require('../lib/tribe-config');
 const { mintCardToRecipient } = require('../lib/crossmint');
 
-module.exports = function createNexusRouter(pool) {
+module.exports = function createNexusRouter(pool, auth = {}) {
   const router = Router();
+  const { requireAuth, optionalAuth } = auth;
 
   // ── POST /api/nexus/pack/buy ───────────────────────────────────
   // Buy a pack → assign cards → mint cNFTs directly to buyer
+  // PROTECTED: requires Grudge Auth token
   //
-  // Body: { grudgeId, packType, wallet?, email? }
+  // Body: { packType, wallet?, email? }
+  //   grudgeId is extracted from the auth token (can't be spoofed)
   //   wallet = Solana address (direct mint)
   //   email  = creates Crossmint custodial wallet
   //   At least one of wallet/email is required.
-  router.post('/pack/buy', async (req, res) => {
-    const { grudgeId, packType, wallet, email } = req.body;
+  router.post('/pack/buy', requireAuth || ((req, res, next) => next()), async (req, res) => {
+    // Use authenticated grudgeId from token (not from body — prevents spoofing)
+    const grudgeId = req.grudgeUser?.grudgeId || req.body.grudgeId;
+    const { packType, wallet, email } = req.body;
 
     if (!grudgeId || !packType) {
       return res.status(400).json({ error: 'grudgeId and packType required' });
@@ -178,7 +183,12 @@ module.exports = function createNexusRouter(pool) {
 
   // ── GET /api/nexus/cards/:grudgeId ─────────────────────────────
   // Get all cards owned by a GrudgeID
-  router.get('/cards/:grudgeId', async (req, res) => {
+  // PROTECTED: users can only view their own cards
+  router.get('/cards/:grudgeId', requireAuth || ((req, res, next) => next()), async (req, res) => {
+    // Verify the authenticated user is requesting their own cards
+    if (req.grudgeUser && req.grudgeUser.grudgeId !== req.params.grudgeId) {
+      return res.status(403).json({ error: 'You can only view your own cards' });
+    }
     try {
       const { rows } = await pool.query(
         `SELECT * FROM nexus_cards WHERE owner_grudge_id = $1 ORDER BY card_number ASC`,
