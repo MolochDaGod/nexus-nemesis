@@ -1,6 +1,8 @@
 node_modules/
 output/
 .env
+.env.local
+.env.vercel
 *.log
 .vercel/
 .DS_Store

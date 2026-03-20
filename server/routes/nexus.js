@@ -3,12 +3,41 @@ const { Router } = require('express');
 const crypto = require('crypto');
 const fetch = require('node-fetch');
 const { v4: uuidv4 } = require('uuid');
+const rateLimit = require('express-rate-limit');
 const { PACK_CONFIG, PACK_TRIBE_WEIGHTS, TRIBES, rollTraits, rollBonusAbilities } = require('../lib/tribe-config');
 const { mintCardToRecipient } = require('../lib/crossmint');
+
+// ── Solana wallet validation ───────────────────────────────────────
+const BASE58_CHARS = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+function isValidSolanaAddress(addr) {
+  if (!addr || typeof addr !== 'string') return false;
+  if (addr.length < 32 || addr.length > 44) return false;
+  return [...addr].every(c => BASE58_CHARS.includes(c));
+}
+
+// ── Rate limiters ─────────────────────────────────────────────────
+const packBuyLimiter = rateLimit({
+  windowMs: 60 * 1000,   // 1 minute window
+  max: 5,                // 5 pack buys per minute per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many pack purchases. Try again in a minute.' },
+});
+
+const readLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,               // 60 reads per minute per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Slow down.' },
+});
 
 module.exports = function createNexusRouter(pool, auth = {}) {
   const router = Router();
   const { requireAuth, optionalAuth } = auth;
+
+  // Apply read limiter to all routes
+  router.use(readLimiter);
 
   // ── POST /api/nexus/pack/buy ───────────────────────────────────
   // Buy a pack → assign cards → mint cNFTs directly to buyer
@@ -19,7 +48,7 @@ module.exports = function createNexusRouter(pool, auth = {}) {
   //   wallet = Solana address (direct mint)
   //   email  = creates Crossmint custodial wallet
   //   At least one of wallet/email is required.
-  router.post('/pack/buy', requireAuth || ((req, res, next) => next()), async (req, res) => {
+  router.post('/pack/buy', packBuyLimiter, requireAuth || ((req, res, next) => next()), async (req, res) => {
     // Use authenticated grudgeId from token (not from body — prevents spoofing)
     const grudgeId = req.grudgeUser?.grudgeId || req.body.grudgeId;
     const { packType, wallet, email } = req.body;
@@ -29,6 +58,16 @@ module.exports = function createNexusRouter(pool, auth = {}) {
     }
     if (!wallet && !email) {
       return res.status(400).json({ error: 'wallet (Solana address) or email required for minting' });
+    }
+
+    // Validate wallet address if provided
+    if (wallet && !isValidSolanaAddress(wallet)) {
+      return res.status(400).json({ error: 'Invalid Solana wallet address' });
+    }
+
+    // Basic email validation if provided
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: 'Invalid email address' });
     }
 
     const config = PACK_CONFIG[packType];
