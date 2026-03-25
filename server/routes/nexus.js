@@ -1,11 +1,15 @@
 // Nexus Nemesis — Card & Pack API Routes (Mint-on-Demand)
 const { Router } = require('express');
 const crypto = require('crypto');
+const path = require('path');
+const fs = require('fs');
 const fetch = require('node-fetch');
 const { v4: uuidv4 } = require('uuid');
+const { parse } = require('csv-parse/sync');
 const rateLimit = require('express-rate-limit');
 const { PACK_CONFIG, PACK_TRIBE_WEIGHTS, TRIBES, rollTraits, rollBonusAbilities } = require('../lib/tribe-config');
 const { mintCardToRecipient } = require('../lib/crossmint');
+const { generateLibraryPrices, getLibraryPrices, calculateLibraryPrice } = require('../lib/library-pricing');
 
 // ── Solana wallet validation ───────────────────────────────────────
 const BASE58_CHARS = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
@@ -38,6 +42,143 @@ module.exports = function createNexusRouter(pool, auth = {}) {
 
   // Apply read limiter to all routes
   router.use(readLimiter);
+
+  // ── Load base cards & compute library prices on startup ────────
+  let libraryCards = [];
+  try {
+    const csvPath = path.resolve(__dirname, '..', '..', 'cards-base.csv');
+    const csvRaw = fs.readFileSync(csvPath, 'utf-8');
+    const baseCards = parse(csvRaw, { columns: true, skip_empty_lines: true, trim: true });
+    const prices = generateLibraryPrices(baseCards);
+    libraryCards = baseCards.map(card => {
+      const p = prices[card.external_id] || { price: 2, tier: 'common' };
+      return {
+        id: parseInt(card.external_id),
+        name: card.name,
+        description: card.description,
+        image: card.image,
+        rarity: card.rarity,
+        type: card.type,
+        subtype: card.subtype,
+        abilities: card.abilities || null,
+        gbuxPrice: p.price,
+        priceTier: p.tier,
+      };
+    });
+    console.log(`Library loaded: ${libraryCards.length} base cards, price range ${Math.min(...libraryCards.map(c => c.gbuxPrice))}–${Math.max(...libraryCards.map(c => c.gbuxPrice))} GBUX`);
+  } catch (err) {
+    console.error('Failed to load library cards:', err.message);
+  }
+
+  // ── GET /api/nexus/library ──────────────────────────────────────
+  // Returns all 102 base cards with fixed GBUX prices (no tribe, no rarity roll)
+  router.get('/library', async (req, res) => {
+    try {
+      // Optionally get stock counts per base card
+      const { rows: stockRows } = await pool.query(
+        `SELECT base_card_id, COUNT(*) as available
+         FROM nexus_cards
+         WHERE owner_grudge_id IS NULL AND mint_status IN ('unminted', 'minted')
+         GROUP BY base_card_id`
+      );
+      const stock = Object.fromEntries(stockRows.map(r => [r.base_card_id, parseInt(r.available)]));
+
+      const cards = libraryCards.map(card => ({
+        ...card,
+        available: stock[card.id] || 0,
+      }));
+
+      res.json({
+        season: 'Season 0',
+        totalCards: cards.length,
+        cards,
+      });
+    } catch (err) {
+      console.error('Library fetch error:', err);
+      res.status(500).json({ error: 'Failed to load library' });
+    }
+  });
+
+  // ── POST /api/nexus/library/buy ─────────────────────────────────
+  // Buy a specific base card at its fixed GBUX price (no tribe roll)
+  router.post('/library/buy', async (req, res) => {
+    const { grudgeId, baseCardId } = req.body;
+
+    if (!grudgeId || !baseCardId) {
+      return res.status(400).json({ error: 'grudgeId and baseCardId required' });
+    }
+
+    const cardId = parseInt(baseCardId);
+    const libCard = libraryCards.find(c => c.id === cardId);
+    if (!libCard) {
+      return res.status(404).json({ error: `Base card ${baseCardId} not found in library` });
+    }
+
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      // TODO: Verify GBUX balance via blockchain/backend
+      // For now, trust the caller has verified payment (same pattern as pack/buy)
+
+      // Find one unassigned card matching this base_card_id
+      const { rows } = await client.query(
+        `SELECT id FROM nexus_cards
+         WHERE base_card_id = $1 AND owner_grudge_id IS NULL
+         ORDER BY card_number ASC
+         LIMIT 1
+         FOR UPDATE SKIP LOCKED`,
+        [cardId]
+      );
+
+      if (rows.length === 0) {
+        await client.query('ROLLBACK');
+        return res.status(503).json({ error: `No copies of "${libCard.name}" available. Sold out!` });
+      }
+
+      const assignedCardId = rows[0].id;
+
+      // Assign card — Library purchase: tribe = 'Library', no tribe roll
+      await client.query(
+        `UPDATE nexus_cards
+         SET owner_grudge_id = $1,
+             tribe = 'Library',
+             tribe_bg = '',
+             tribe_border = '',
+             mint_status = 'assigned',
+             assigned_at = NOW()
+         WHERE id = $2`,
+        [grudgeId, assignedCardId]
+      );
+
+      // Log library purchase
+      await client.query(
+        `INSERT INTO nexus_library_purchases (grudge_id, base_card_id, card_id, gbux_price)
+         VALUES ($1, $2, $3, $4)`,
+        [grudgeId, cardId, assignedCardId, libCard.gbuxPrice]
+      );
+
+      await client.query('COMMIT');
+
+      // Fetch full card details
+      const { rows: cardRows } = await pool.query(
+        `SELECT * FROM nexus_cards WHERE id = $1`,
+        [assignedCardId]
+      );
+
+      res.json({
+        purchased: true,
+        gbuxPrice: libCard.gbuxPrice,
+        card: cardRows.length > 0 ? formatCard(cardRows[0]) : { id: assignedCardId },
+      });
+    } catch (err) {
+      await client.query('ROLLBACK');
+      console.error('Library buy error:', err);
+      res.status(500).json({ error: 'Failed to purchase card' });
+    } finally {
+      client.release();
+    }
+  });
 
   // ── POST /api/nexus/pack/buy ───────────────────────────────────
   // Buy a pack → assign cards → mint cNFTs directly to buyer

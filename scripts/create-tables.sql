@@ -75,6 +75,19 @@ CREATE INDEX IF NOT EXISTS idx_nexus_mint_log_card ON nexus_mint_log(card_id);
 CREATE INDEX IF NOT EXISTS idx_nexus_mint_log_status ON nexus_mint_log(crossmint_status);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_nexus_mint_log_action ON nexus_mint_log(crossmint_action_id) WHERE crossmint_action_id IS NOT NULL;
 
+-- Library purchase records (fixed-price base card sales, no tribe roll)
+CREATE TABLE IF NOT EXISTS nexus_library_purchases (
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  grudge_id       TEXT NOT NULL,
+  base_card_id    INTEGER NOT NULL,                  -- references cards-base.csv external_id
+  card_id         UUID NOT NULL REFERENCES nexus_cards(id),
+  gbux_price      INTEGER NOT NULL,                  -- price paid in GBUX
+  purchased_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_nexus_library_grudge ON nexus_library_purchases(grudge_id);
+CREATE INDEX IF NOT EXISTS idx_nexus_library_base ON nexus_library_purchases(base_card_id);
+
 -- Migration helper: run these if tables already exist from old schema
 -- ALTER TABLE nexus_cards ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
 -- ALTER TABLE nexus_cards DROP CONSTRAINT IF EXISTS nexus_cards_mint_status_check;
