@@ -64,9 +64,14 @@ function buildCardMetadata(card) {
  * @param {Object} recipient - { wallet?: string, email?: string }
  * @returns {Promise<{ actionId: string, alreadyMinted: boolean }>}
  */
+function trimEnv(name) {
+  const v = process.env[name];
+  return typeof v === 'string' ? v.trim() : v;
+}
+
 async function mintCardToRecipient(card, recipient) {
-  const collectionId = process.env.CROSSMINT_COLLECTION_ID;
-  const apiKey = process.env.CROSSMINT_API_KEY;
+  const collectionId = trimEnv('CROSSMINT_COLLECTION_ID');
+  const apiKey = trimEnv('CROSSMINT_API_KEY') || trimEnv('CROSSMINT_SERVER_API_KEY');
 
   if (!collectionId || !apiKey) {
     throw new Error('CROSSMINT_COLLECTION_ID and CROSSMINT_API_KEY required');
