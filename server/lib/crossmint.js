@@ -81,7 +81,7 @@ async function mintCardToRecipient(card, recipient) {
     recipient: buildRecipient(recipient),
     metadata: buildCardMetadata(card),
     compressed: true,
-    reuploadLinkedFiles: false,
+    reuploadLinkedFiles: true,
   };
 
   // Idempotent mint — card UUID is the unique key
