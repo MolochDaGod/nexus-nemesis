@@ -16,7 +16,7 @@ if (r.status !== 0) throw new Error('Railway vars failed');
 const rv = JSON.parse(r.stdout);
 
 const envMap = {
-  DATABASE_URL: rv.DATABASE_URL,
+  DATABASE_URL: (rv.DATABASE_PUBLIC_URL || rv.DATABASE_URL || '').trim(),
   CROSSMINT_API_KEY: (rv.CROSSMINT_SERVER_API_KEY || rv.CROSSMINT_API_KEY || '').trim(),
   CROSSMINT_COLLECTION_ID: (rv.CROSSMINT_PACK_COLLECTION_ID || rv.CROSSMINT_CARD_COLLECTION_ID || rv.CROSSMINT_COLLECTION_ID || '').trim(),
   CROSSMINT_WEBHOOK_SECRET: (rv.CROSSMINT_WEBHOOK_SECRET || '').trim(),
