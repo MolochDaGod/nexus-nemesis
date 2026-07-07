@@ -1,57 +1,59 @@
 // Nexus Nemesis — Tribe Configuration
 // Tribes are assigned at mint via weighted random roll, independent of base card subtype.
 
+const CDN = 'https://assets.grudge-studio.com/nexus/tribes';
+
 const TRIBES = {
   'Iron Will': {
     key: 'iron_will',
-    background: 'https://i.imgur.com/QPQXtX5.png',
+    background: `${CDN}/iron-will-bg.png`,
     borderColor: '#C0C0C0',
     badgeColor: '#C0C0C0',
     probability: 0.40,
     upgrade: 'Each Iron Will minion gains +1 HP at turn start if multiple on field',
     spell: 'Plays 1/1 Grudge',
-    emblem: 'https://i.imgur.com/SRoq392.png',
+    emblem: `${CDN}/emblem.png`,
   },
   'Tribal War': {
     key: 'tribal_war',
-    background: 'https://i.imgur.com/yPR4E8e.png',
+    background: `${CDN}/tribal-war-bg.png`,
     borderColor: '#FFA500',
     badgeColor: '#FFA500',
     probability: 0.35,
     upgrade: 'Spawns 1/1 Taunt minion on play',
     spell: 'Heal player for 1 Health',
-    emblem: 'https://i.imgur.com/SRoq392.png',
+    emblem: `${CDN}/emblem.png`,
   },
   'Fabled': {
     key: 'fabled',
-    background: 'https://i.imgur.com/G0hXKXn.png',
+    background: `${CDN}/fabled-bg.png`,
     borderColor: '#800080',
     badgeColor: '#800080',
     probability: 0.15,
     upgrade: 'Each Fabled reduces mana cost of other Fabled cards by 1 (min 0)',
     spell: 'Give all Grudges +0/+1',
-    emblem: 'https://i.imgur.com/SRoq392.png',
+    emblem: `${CDN}/emblem.png`,
   },
   'Blood For Conquest': {
     key: 'blood_for_conquest',
-    background: 'https://i.imgur.com/FqkZqZb.png',
+    background: `${CDN}/blood-for-conquest-bg.png`,
     borderColor: '#FF0000',
     badgeColor: '#FF0000',
     probability: 0.10,
     upgrade: '+1 Attack to existing Red minions on summon (this turn only)',
     spell: 'Give all Grudges +1/+0',
-    emblem: 'https://i.imgur.com/SRoq392.png',
+    emblem: `${CDN}/emblem.png`,
   },
   'Ethereal Signature': {
     key: 'ethereal_signature',
-    background: 'https://i.imgur.com/o0d99bB.png',
+    background: `${CDN}/ethereal-signature-bg.png`,
     borderColor: '#FFD700',
     badgeColor: '#00FF00',
     probability: 0.02,
     upgrade: 'One-of-one, -1 mana cost, +2/+2, max 1 on field, max 3 in deck',
     spell: 'Half cost of normal spells',
-    emblem: 'https://i.imgur.com/SRoq392.png',
-    middleEmblem: 'https://i.imgur.com/48to9zn.png',
+    emblem: `${CDN}/emblem.png`,
+    middleEmblem: `${CDN}/middle-emblem.png`,
   },
 };
 

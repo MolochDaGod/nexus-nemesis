@@ -1,103 +1,103 @@
 external_id,name,description,image,rarity,type,subtype,abilities
-1,Stealth Drone,Quick scouting unit cloaked in shadow.,https://i.imgur.com/nJMY8NA.png,Common,Minion,Ship,Stealth
-2,Cowardly Priest,His prayers heal though his courage wanes.,https://i.imgur.com/tjWUZus.png,Common,Minion,Crusade,"Battlecry: Restore 1 Health to your hero."
-3,Starborn Esper,A fleeting spark of cosmic wonder.,https://i.imgur.com/dshnei4.png,Common,Minion,Lore,
-4,Arcane Archer,She channels the mysteries of the arcane.,https://i.imgur.com/dyPYSgc.png,Uncommon,Minion,Lore,"Battlecry: Draw a card."
-5,Alpha Skiff,"Swift and lethal, it strikes from the void.",https://i.imgur.com/z1fbkXx.png,Common,Minion,Ship,Haste
-6,Orcish Sniper,Arrows rain from the shadows.,https://i.imgur.com/nlkfMpI.png,CommonHC,Spell,Legion,Deal 1 damage to all enemies.
-7,Mace Assassin,His mace delivers justice in silence.,https://i.imgur.com/lwTIb66.png,Uncommon,Minion,Crusade,Stealth
-8,Swarm Legion,A horde driven by relentless fury.,https://i.imgur.com/Kr5SzLh.png,Common,Minion,Legion,"Battlecry: Summon a 1/1 Grudge with Taunt."
-9,Frozen Phantom,"A ghostly sentinel, barring the enemy's path.",https://i.imgur.com/zA4lDwj.png,Common,Minion,Legion,Taunt
-10,Crimson Shade,Burns with crimson energy.,https://i.imgur.com/3aXjZ5b.png,Common,Minion,Elf,Stealth
-11,Ruff Worker,His labor strengthens the righteous.,https://i.imgur.com/d1GQxLH.png,Common,Minion,Crusade,"Battlecry: Give a friendly minion +1 Health."
-12,Luminous Watcher,He watches those that watch.,https://i.imgur.com/wUHrPRU.png,Rare,Minion,Legion,"At the start of your turn: Restore 1 Health to all friendly minions."
-13,Rolling Thalar,A monk's whisper ignited his spirit.,https://i.imgur.com/XcvBmCy.png,Rare,Minion,Elf,"Battlecry: Give all friendly minions +1 Attack this turn."
-14,Battle Commander,Leads the charge with unbreakable resolve.,https://i.imgur.com/e1y365m.png,Common,Minion,Crusade,Taunt
-15,Night Wraith,Strikes from the shadows.,https://i.imgur.com/SuhuNa6.png,Uncommon,Minion,Legion,Stealth
-16,Night Lord,"Roams the shadows, cloaking allies.",https://i.imgur.com/45Nkl3W.png,Rare,Minion,Elf,"Battlecry: Give a friendly minion Stealth."
-17,Gei-Eye,"Blind but swift, his strikes are unerring.",https://i.imgur.com/X18XmtN.png,Uncommon,Minion,Legion,Haste
-18,Salvation's Stalker,Seeks redemption in the chaos of war.,https://i.imgur.com/WcoUO2G.png,Common,Minion,Crusade,"Battlecry: Summon a 1/1 Grudge with Taunt."
-19,Storm Cavalier,His lance rides the storm's fury.,https://i.imgur.com/Sb1Ev9O.png,Rare,Minion,Crusade,"Battlecry: Deal 2 damage to an enemy minion."
-20,Flame Charger,Charges with fiery speed.,https://i.imgur.com/dIIDbac.png,Rare,Minion,Legion,Double Strike
-21,X3rror,"A glitch in Alvon's fate, sowing chaos.",https://i.imgur.com/4Nw3IQv.png,Legendary,Hero,Elf,"Battlecry: Summon two 1/1 Grudges with Taunt."
-22,Beta Cruiser,Master of deadly precision strikes.,https://i.imgur.com/grlVpW6.png,Uncommon,Minion,Ship,"Battlecry: Deal 2 damage to an enemy minion."
-23,Enigmatic Warrior,Mysterious combatant with hidden motives.,https://i.imgur.com/JwcxWth.png,Common,Minion,Legion,
-24,Barrier Vessel,"Unyielding defense that grows stronger.",https://i.imgur.com/Lajvj8w.png,Uncommonhc,Minion,Crusade,"At the start of your turn: Gain +1 Attack."
-25,Void Sorcerer,Casts dark magic from the abyss.,https://i.imgur.com/MXz3jc3.png,Rare,Minion,Legion,"Battlecry: Deal 3 damage to a random enemy minion."
-26,Light Mage,Shields with radiant magic.,https://i.imgur.com/CKgcfXb.png,Rare,Minion,Elf,"At the start of your turn: Restore 1 Health to all friendly minions."
-27,Time Caster,Bends time to reshape the battlefield.,https://i.imgur.com/x4Ljnll.png,Rare,Minion,Ship,"Battlecry: Return a friendly minion to your hand."
-28,Radiant Paladin,Shines with radiant power.,https://i.imgur.com/d5Q9KNl.png,Uncommon,Minion,Crusade,Taunt
-29,Vitality Totem,Heals wounds with gentle touch.,https://i.imgur.com/IQrV3et.png,Uncommon,Minion,Elf,"Battlecry: Restore 2 Health to all friendly characters."
-30,Ironclad Sufferer,Heavy armored enforcer enduring pain.,https://i.imgur.com/5j4Sc0m.png,Common,Minion,Legion,Taunt
-31,Overlord Dragon,Calls lightning from stormy skies.,https://i.imgur.com/2goA55f.png,Common,Minion,Legion,"Battlecry: Deal 2 damage to all enemy minions."
-32,Cerb,Speaks all languages with ease.,https://i.imgur.com/RGIuubn.png,Common,Minion,Celestial,Haste
-33,Abyssal Keeper,Heals with dark energy.,https://i.imgur.com/KaUDhZt.png,Rare,Minion,Legion,Taunt
-34,Arcane Missile,Bolts of arcane energy seek their mark.,https://i.imgur.com/JuxTEX9.png,Common,Spell,Spell,Deal 3 damage randomly split among enemy characters.
-35,Shadow Strike,"A blade cloaked in darkness, striking true.",https://i.imgur.com/cOAKCRP.png,Uncommon,Minion,Legion,"Battlecry: Deal 4 damage to an enemy minion."
-36,Green Doctor,His remedies mend the gravest wounds.,https://i.imgur.com/xKQM1BX.png,Epic,Minion,Crusade,"Taunt. Battlecry: Restore 6 Health to a friendly character."
-37,Mind Control,A whisper that bends the strongest wills.,https://i.imgur.com/IIz6wjR.png,Common,Spell,Spell,Take control of an enemy minion.
-38,Starship RiVI,"Communicates with the dead.",https://i.imgur.com/SpwgvuM.png,Epic,Minion,Ship,"Stealth. Battlecry: Summon two 1/1 Grudges with Taunt."
-39,Star Hut,Predicts enemy moves with foresight.,https://i.imgur.com/lszPOCd.png,Uncommon,Minion,Ship,"Taunt. At the start of your turn: Restore 1 Health to all friendly minions."
-40,Engineer Prime,Fortifies the front lines with precision.,https://i.imgur.com/QShonG5.png,Rare,Minion,Crusade,"Battlecry: Summon two 2/2 Grudges with Taunt."
-41,Starship Beta,Deals precise strikes to fortifications.,https://i.imgur.com/BSurWbZ.png,Uncommon,Minion,Ship,"Battlecry: Deal 2 damage to an enemy minion."
-42,Starship Gamma,Heals allies with cosmic energy.,https://i.imgur.com/5PSOVVc.png,Common,Minion,Ship,"At the start of your turn: Restore 1 Health to all friendly minions."
-43,Star Cruiser,A juggernaut that crushes resistance.,https://i.imgur.com/0iNkSRU.png,Epic,Minion,Ship,"Battlecry: Deal 3 damage to all enemy minions."
-44,Heat Seeker,Tracks prey across the battlefield.,https://i.imgur.com/GBsrUb1.png,Common,Spell,Spell,Deal 3 damage to a target minion.
-45,Spirit Of Grudge,Grants Undead strength that endures.,https://i.imgur.com/KqSF1B2.png,Common,Minion,Legion,
-46,The Knight's Helper,Grants Human loyalty to the cause.,https://i.imgur.com/0XcU175.png,Common,Minion,Crusade,"Battlecry: Give a friendly minion +1 Attack."
-47,Groad,Grants Orc ferocity in battle.,https://i.imgur.com/WYSsqMY.png,Common,Minion,Legion,Taunt
-48,Shelenif,Grants Elf grace and precision.,https://i.imgur.com/6CXJn5s.png,Common,Minion,Elf,
-49,Druu h'Karno,Grants Dwarf resilience in combat.,https://i.imgur.com/3NbOaQP.png,Uncommon,Minion,Legion,"Battlecry: Deal 1 damage to all enemy minions."
-50,Kagnoat,Grants Barbarian might and fury.,https://i.imgur.com/a8pRbUI.png,Common,Minion,Crusade,Taunt
-51,Sly Skuller,Swift skeletal fighter with venomous strikes.,https://i.imgur.com/0isS1vU.png,Uncommon,Minion,Legion,Poison Touch
-52,Sleeping Dragon,"Alvon's guardian, awakened to protect.",https://i.imgur.com/T1O3w1g.png,Legendary,Hero,Legion,"Battlecry: Deal 3 damage to all enemy minions."
-53,Tar-Gan,Stealthy orc scout with deadly aim.,https://i.imgur.com/iCnwBhv.png,Common,Minion,Legion,Stealth
-54,Barbarian Mace,Barbarian wielding a heavy mace.,https://i.imgur.com/3SkE6VG.png,Common,Minion,Crusade,
-55,The Breaker of Alvon,"Alvon's warrior, shattering chains.",https://i.imgur.com/0sEB7lc.png,Legendary,Hero,Crusade,"Gold Shield. Battlecry: Deal 3 damage to an enemy minion."
-56,The Beloved of Alvon,"Alvon's heart, mending the broken.",https://i.imgur.com/ZHEyuU8.png,Legendary,Hero,Crusade,"Battlecry: Restore 5 Health to all friendly characters."
-57,Rilen LongBow,Precise elf archer with deadly aim.,https://i.imgur.com/ydKwqEy.png,Common,Minion,Elf,"Battlecry: Deal 1 damage to an enemy."
-58,Great Grunt,Armored knight with divine strength.,https://i.imgur.com/mQFU119.png,Epic,Minion,Crusade,Gold Shield
-59,Dawned Knight,Heavily armored dwarf knight.,https://i.imgur.com/nDkKg5i.png,Uncommon,Minion,Crusade,Taunt
-60,Yorda,Bats with thunderous force.,https://i.imgur.com/UvZsOLQ.png,Common,Minion,Crusade,"Battlecry: Give all friendly minions +1 Attack."
-61,Proud Spellbinder,Casts arcane spells with mastery.,https://i.imgur.com/xW35xEX.png,Uncommon,Minion,Crusade,"Battlecry: Draw a Spell card."
-62,Calvin,Glides with icy magic.,https://i.imgur.com/mHO0KZa.png,Epic,Minion,Crusade,Haste
-63,Uneasy Tombs,Undead soldier with enduring spirit.,https://i.imgur.com/7TXqqHZ.png,Common,Minion,Legion,"Battlecry: Summon a 1/1 Grudge with Taunt."
-64,Gabsiona Federi,Human wizard casting powerful spells.,https://i.imgur.com/qi0ebX7.png,Common,Minion,Crusade,Taunt
-65,Sergeant of the Mace,Human archer with deadly precision.,https://i.imgur.com/1W6WH38.png,Common,Minion,Crusade,"Battlecry: Deal 2 damage to all enemy minions."
-66,Clever Neve,Undead warrior with cunning tactics.,https://i.imgur.com/RHdJFRv.png,Uncommon,Minion,Elf,"Battlecry: Draw a card."
-67,Double Shot,Undead archer with ghostly arrows.,https://i.imgur.com/itUYjDf.png,Common,Minion,Crusade,"Battlecry: Deal 2 damage to an enemy minion."
-68,Wise Stien,Explosive barrel used as a weapon.,https://i.imgur.com/UWivjA4.png,Common,Minion,Crusade,
-69,Gorgoz,Orc archer with a heavy bow.,https://i.imgur.com/cCtGqVi.png,Common,Minion,Legion,"Battlecry: Deal 2 damage to an enemy."
-70,Matra Healer,Heals allies with divine light.,https://i.imgur.com/0pEl5QA.png,Uncommon,Minion,Elf,"Battlecry: Restore 4 Health to a friendly minion."
-71,Arturo of the South,Protects with holy power.,https://i.imgur.com/TmWcZRr.png,Common,Minion,Crusade,"Battlecry: Deal 3 damage to an enemy minion."
-72,Gruuubk,Heavy orc with a massive axe.,https://i.imgur.com/OMos5zZ.png,Uncommon,Minion,Legion,Taunt
-73,Champion of Hope,Heavily armored human warrior.,https://i.imgur.com/dhHC7K5.png,Common,Minion,Crusade,"Taunt. Battlecry: Restore 5 Health to all friendly characters."
-74,Hope's Demand,Undead giant with a spiked club.,https://i.imgur.com/7VqdkUB.png,Uncommon,Minion,Crusade,"Battlecry: Give all friendly minions +1/+1."
-75,WareTree,Living tree that attacks with roots.,https://i.imgur.com/gA5V2vd.png,Uncommon,Minion,Elf,Taunt
-76,Small Troll,Small troll with regenerative powers.,https://i.imgur.com/ep8ADev.png,Common,Minion,Legion,
-77,John Wayne: Captain,Commands the skies with grit and guile.,https://i.imgur.com/V72hBmF.png,Epic,Minion,Ship,"Battlecry: Deal 2 damage to all enemy minions. Stealth."
-78,Dwarf Enforcer,Heavy dwarf with a warhammer.,https://i.imgur.com/jTJc7XE.png,Uncommon,Minion,Crusade,Taunt
-79,Scourge,Dark familiar that boosts spells.,https://i.imgur.com/2WUEurF.png,Epic,Minion,Legion,"Battlecry: Deal 2 damage to all enemy minions."
-80,Faith Bearer,"Alvon's priest, uniting its champions.",https://i.imgur.com/oXH8vh7.png,Legendary,Hero,Crusade,"Battlecry: Give all friendly minions Gold Shield."
-81,Glorified Ending,A fiery judgment upon the battlefield.,https://i.imgur.com/E1q4QX0.png,Uncommon,Spell,Spell,Destroy an enemy minion.
-82,Clasmic Bolt,A surge of energy that scorches foes.,https://i.imgur.com/4zdaQ55.png,Rare,Spell,Spell,Deal 5 damage to all enemy characters.
-83,Spell Hammer,A mystic strike that fuels sorcery.,https://i.imgur.com/wOfSH4s.png,Common,Spell,Spell,Deal 3 damage to a random enemy and draw a card.
-84,Swirling Storm,A tempest that tears through ranks.,https://i.imgur.com/laUgc5E.png,Epic,Spell,Spell,Deal 4 damage to all enemy minions.
-85,Fireball,A blazing orb of destruction.,https://i.imgur.com/46zVuKY.png,Rare,Spell,Spell,Deal 6 damage to a target.
-86,Swipe of the Mage,A flick of the wrist weakens foes.,https://i.imgur.com/uA5Kpet.png,Rare,Spell,Spell,Take control of an enemy minion with 3 or less Attack.
-87,Forged Weapons,"Fresh from the forge, blades thirst for battle.",https://i.imgur.com/nffwcar.png,Common,Spell,Spell,Give all friendly minions +2 Attack this turn.
-88,Special Noise!,A discordant cry that bolsters allies.,https://i.imgur.com/WBjYFlN.png,Epic,Spell,Spell,Give friendly minions +2 Health and deal 2 damage to all enemy minions.
-89,Book,Ancient pages hold forgotten secrets.,https://i.imgur.com/53eid0D.png,Common,Spell,Spell,Draw 2 cards.
-90,Light,A radiant glow that mends the broken.,https://i.imgur.com/ymZEywJ.png,Common,Spell,Spell,Restore 4 Health to a friendly character.
-91,Meat!,A feast that fuels enduring strength.,https://i.imgur.com/w4XUbaI.png,Uncommon,Spell,Spell,Restore 6 Health to a friendly character.
-92,Brothers Keeper,"Alvon's vow, a shield for its champions.",https://i.imgur.com/MzrTJXw.png,Legendary,Hero,Spell,Deal 7 damage to all enemy minions.
-93,Mystic Green,A verdant surge that renews life.,https://i.imgur.com/MAkqPa3.png,Rare,Spell,Spell,Restore 5 Health to all friendly characters.
-94,Skull Magic,Dark sorcery that binds death to life.,https://i.imgur.com/aZWMBoG.png,Rare,Spell,Spell,Deal 6 damage to a target and summon a 2/2 Grudge.
-95,Green Skull Magic,A twisted spell that takes and gives.,https://i.imgur.com/VYlB95f.png,Rare,Spell,Spell,Deal 5 damage to a target and restore 5 Health to your hero.
-96,Small Building,Defensive structure for enduring battles.,https://i.imgur.com/LouhX6b.png,Common,Minion,Crusade,"Taunt. At the start of your turn: Gain +1 Attack."
-97,Summoning Tower,Summons spirits to guard the field.,https://i.imgur.com/VcPwEZm.png,Common,Minion,Crusade,"At the end of your turn: Give all friendly minions +1 Attack."
-98,Armory,Forges weapons to empower allies.,https://i.imgur.com/YTGTyN1.png,Epic,Minion,Crusade,"At the end of your turn: Give all friendly minions +1 Health."
-99,Hero Hall,Boosts heroes with legendary might.,https://i.imgur.com/6B4ZbFt.png,Common,Minion,Crusade,"At the end of your turn: Give all friendly minions +1 Attack and summon a 1/1 Grudge with Taunt."
-100,Farm,Nourishes warriors with vital strength.,https://i.imgur.com/KcD3SYv.png,Common,Minion,Crusade,"At the end of your turn: Give all friendly minions +1 Health."
-101,Grudge,"A restless spirit, bound to serve any master.",https://i.imgur.com/sUjTI8c.png,Common,StarterM,StarterM,
-102,Sling Shot,"A simple weapon, deadly in skilled hands.",https://i.imgur.com/901uCC6.png,Common,StarterM,StarterM,
+1,Stealth Drone,Quick scouting unit cloaked in shadow.,https://assets.grudge-studio.com/nexus/cards/1.png,Common,Minion,Ship,Stealth
+2,Cowardly Priest,His prayers heal though his courage wanes.,https://assets.grudge-studio.com/nexus/cards/2.png,Common,Minion,Crusade,Battlecry: Restore 1 Health to your hero.
+3,Starborn Esper,A fleeting spark of cosmic wonder.,https://assets.grudge-studio.com/nexus/cards/3.png,Common,Minion,Lore,
+4,Arcane Archer,She channels the mysteries of the arcane.,https://assets.grudge-studio.com/nexus/cards/4.png,Uncommon,Minion,Lore,Battlecry: Draw a card.
+5,Alpha Skiff,"Swift and lethal, it strikes from the void.",https://assets.grudge-studio.com/nexus/cards/5.png,Common,Minion,Ship,Haste
+6,Orcish Sniper,Arrows rain from the shadows.,https://assets.grudge-studio.com/nexus/cards/6.png,CommonHC,Spell,Legion,Deal 1 damage to all enemies.
+7,Mace Assassin,His mace delivers justice in silence.,https://assets.grudge-studio.com/nexus/cards/7.png,Uncommon,Minion,Crusade,Stealth
+8,Swarm Legion,A horde driven by relentless fury.,https://assets.grudge-studio.com/nexus/cards/8.png,Common,Minion,Legion,Battlecry: Summon a 1/1 Grudge with Taunt.
+9,Frozen Phantom,"A ghostly sentinel, barring the enemy's path.",https://assets.grudge-studio.com/nexus/cards/9.png,Common,Minion,Legion,Taunt
+10,Crimson Shade,Burns with crimson energy.,https://assets.grudge-studio.com/nexus/cards/10.png,Common,Minion,Elf,Stealth
+11,Ruff Worker,His labor strengthens the righteous.,https://assets.grudge-studio.com/nexus/cards/11.png,Common,Minion,Crusade,Battlecry: Give a friendly minion +1 Health.
+12,Luminous Watcher,He watches those that watch.,https://assets.grudge-studio.com/nexus/cards/12.png,Rare,Minion,Legion,At the start of your turn: Restore 1 Health to all friendly minions.
+13,Rolling Thalar,A monk's whisper ignited his spirit.,https://assets.grudge-studio.com/nexus/cards/13.png,Rare,Minion,Elf,Battlecry: Give all friendly minions +1 Attack this turn.
+14,Battle Commander,Leads the charge with unbreakable resolve.,https://assets.grudge-studio.com/nexus/cards/14.png,Common,Minion,Crusade,Taunt
+15,Night Wraith,Strikes from the shadows.,https://assets.grudge-studio.com/nexus/cards/15.png,Uncommon,Minion,Legion,Stealth
+16,Night Lord,"Roams the shadows, cloaking allies.",https://assets.grudge-studio.com/nexus/cards/16.png,Rare,Minion,Elf,Battlecry: Give a friendly minion Stealth.
+17,Gei-Eye,"Blind but swift, his strikes are unerring.",https://assets.grudge-studio.com/nexus/cards/17.png,Uncommon,Minion,Legion,Haste
+18,Salvation's Stalker,Seeks redemption in the chaos of war.,https://assets.grudge-studio.com/nexus/cards/18.png,Common,Minion,Crusade,Battlecry: Summon a 1/1 Grudge with Taunt.
+19,Storm Cavalier,His lance rides the storm's fury.,https://assets.grudge-studio.com/nexus/cards/19.png,Rare,Minion,Crusade,Battlecry: Deal 2 damage to an enemy minion.
+20,Flame Charger,Charges with fiery speed.,https://assets.grudge-studio.com/nexus/cards/20.png,Rare,Minion,Legion,Double Strike
+21,X3rror,"A glitch in Alvon's fate, sowing chaos.",https://assets.grudge-studio.com/nexus/cards/21.png,Legendary,Hero,Elf,Battlecry: Summon two 1/1 Grudges with Taunt.
+22,Beta Cruiser,Master of deadly precision strikes.,https://assets.grudge-studio.com/nexus/cards/22.png,Uncommon,Minion,Ship,Battlecry: Deal 2 damage to an enemy minion.
+23,Enigmatic Warrior,Mysterious combatant with hidden motives.,https://assets.grudge-studio.com/nexus/cards/23.png,Common,Minion,Legion,
+24,Barrier Vessel,Unyielding defense that grows stronger.,https://assets.grudge-studio.com/nexus/cards/24.png,Uncommonhc,Minion,Crusade,At the start of your turn: Gain +1 Attack.
+25,Void Sorcerer,Casts dark magic from the abyss.,https://assets.grudge-studio.com/nexus/cards/25.png,Rare,Minion,Legion,Battlecry: Deal 3 damage to a random enemy minion.
+26,Light Mage,Shields with radiant magic.,https://assets.grudge-studio.com/nexus/cards/26.png,Rare,Minion,Elf,At the start of your turn: Restore 1 Health to all friendly minions.
+27,Time Caster,Bends time to reshape the battlefield.,https://assets.grudge-studio.com/nexus/cards/27.png,Rare,Minion,Ship,Battlecry: Return a friendly minion to your hand.
+28,Radiant Paladin,Shines with radiant power.,https://assets.grudge-studio.com/nexus/cards/28.png,Uncommon,Minion,Crusade,Taunt
+29,Vitality Totem,Heals wounds with gentle touch.,https://assets.grudge-studio.com/nexus/cards/29.png,Uncommon,Minion,Elf,Battlecry: Restore 2 Health to all friendly characters.
+30,Ironclad Sufferer,Heavy armored enforcer enduring pain.,https://assets.grudge-studio.com/nexus/cards/30.png,Common,Minion,Legion,Taunt
+31,Overlord Dragon,Calls lightning from stormy skies.,https://assets.grudge-studio.com/nexus/cards/31.png,Common,Minion,Legion,Battlecry: Deal 2 damage to all enemy minions.
+32,Cerb,Speaks all languages with ease.,https://assets.grudge-studio.com/nexus/cards/32.png,Common,Minion,Celestial,Haste
+33,Abyssal Keeper,Heals with dark energy.,https://assets.grudge-studio.com/nexus/cards/33.png,Rare,Minion,Legion,Taunt
+34,Arcane Missile,Bolts of arcane energy seek their mark.,https://assets.grudge-studio.com/nexus/cards/34.png,Common,Spell,Spell,Deal 3 damage randomly split among enemy characters.
+35,Shadow Strike,"A blade cloaked in darkness, striking true.",https://assets.grudge-studio.com/nexus/cards/35.png,Uncommon,Minion,Legion,Battlecry: Deal 4 damage to an enemy minion.
+36,Green Doctor,His remedies mend the gravest wounds.,https://assets.grudge-studio.com/nexus/cards/36.png,Epic,Minion,Crusade,Taunt. Battlecry: Restore 6 Health to a friendly character.
+37,Mind Control,A whisper that bends the strongest wills.,https://assets.grudge-studio.com/nexus/cards/37.png,Common,Spell,Spell,Take control of an enemy minion.
+38,Starship RiVI,Communicates with the dead.,https://assets.grudge-studio.com/nexus/cards/38.png,Epic,Minion,Ship,Stealth. Battlecry: Summon two 1/1 Grudges with Taunt.
+39,Star Hut,Predicts enemy moves with foresight.,https://assets.grudge-studio.com/nexus/cards/39.png,Uncommon,Minion,Ship,Taunt. At the start of your turn: Restore 1 Health to all friendly minions.
+40,Engineer Prime,Fortifies the front lines with precision.,https://assets.grudge-studio.com/nexus/cards/40.png,Rare,Minion,Crusade,Battlecry: Summon two 2/2 Grudges with Taunt.
+41,Starship Beta,Deals precise strikes to fortifications.,https://assets.grudge-studio.com/nexus/cards/41.png,Uncommon,Minion,Ship,Battlecry: Deal 2 damage to an enemy minion.
+42,Starship Gamma,Heals allies with cosmic energy.,https://assets.grudge-studio.com/nexus/cards/42.png,Common,Minion,Ship,At the start of your turn: Restore 1 Health to all friendly minions.
+43,Star Cruiser,A juggernaut that crushes resistance.,https://assets.grudge-studio.com/nexus/cards/43.png,Epic,Minion,Ship,Battlecry: Deal 3 damage to all enemy minions.
+44,Heat Seeker,Tracks prey across the battlefield.,https://assets.grudge-studio.com/nexus/cards/44.png,Common,Spell,Spell,Deal 3 damage to a target minion.
+45,Spirit Of Grudge,Grants Undead strength that endures.,https://assets.grudge-studio.com/nexus/cards/45.png,Common,Minion,Legion,
+46,The Knight's Helper,Grants Human loyalty to the cause.,https://assets.grudge-studio.com/nexus/cards/46.png,Common,Minion,Crusade,Battlecry: Give a friendly minion +1 Attack.
+47,Groad,Grants Orc ferocity in battle.,https://assets.grudge-studio.com/nexus/cards/47.png,Common,Minion,Legion,Taunt
+48,Shelenif,Grants Elf grace and precision.,https://assets.grudge-studio.com/nexus/cards/48.png,Common,Minion,Elf,
+49,Druu h'Karno,Grants Dwarf resilience in combat.,https://assets.grudge-studio.com/nexus/cards/49.png,Uncommon,Minion,Legion,Battlecry: Deal 1 damage to all enemy minions.
+50,Kagnoat,Grants Barbarian might and fury.,https://assets.grudge-studio.com/nexus/cards/50.png,Common,Minion,Crusade,Taunt
+51,Sly Skuller,Swift skeletal fighter with venomous strikes.,https://assets.grudge-studio.com/nexus/cards/51.png,Uncommon,Minion,Legion,Poison Touch
+52,Sleeping Dragon,"Alvon's guardian, awakened to protect.",https://assets.grudge-studio.com/nexus/cards/52.png,Legendary,Hero,Legion,Battlecry: Deal 3 damage to all enemy minions.
+53,Tar-Gan,Stealthy orc scout with deadly aim.,https://assets.grudge-studio.com/nexus/cards/53.png,Common,Minion,Legion,Stealth
+54,Barbarian Mace,Barbarian wielding a heavy mace.,https://assets.grudge-studio.com/nexus/cards/54.png,Common,Minion,Crusade,
+55,The Breaker of Alvon,"Alvon's warrior, shattering chains.",https://assets.grudge-studio.com/nexus/cards/55.png,Legendary,Hero,Crusade,Gold Shield. Battlecry: Deal 3 damage to an enemy minion.
+56,The Beloved of Alvon,"Alvon's heart, mending the broken.",https://assets.grudge-studio.com/nexus/cards/56.png,Legendary,Hero,Crusade,Battlecry: Restore 5 Health to all friendly characters.
+57,Rilen LongBow,Precise elf archer with deadly aim.,https://assets.grudge-studio.com/nexus/cards/57.png,Common,Minion,Elf,Battlecry: Deal 1 damage to an enemy.
+58,Great Grunt,Armored knight with divine strength.,https://assets.grudge-studio.com/nexus/cards/58.png,Epic,Minion,Crusade,Gold Shield
+59,Dawned Knight,Heavily armored dwarf knight.,https://assets.grudge-studio.com/nexus/cards/59.png,Uncommon,Minion,Crusade,Taunt
+60,Yorda,Bats with thunderous force.,https://assets.grudge-studio.com/nexus/cards/60.png,Common,Minion,Crusade,Battlecry: Give all friendly minions +1 Attack.
+61,Proud Spellbinder,Casts arcane spells with mastery.,https://assets.grudge-studio.com/nexus/cards/61.png,Uncommon,Minion,Crusade,Battlecry: Draw a Spell card.
+62,Calvin,Glides with icy magic.,https://assets.grudge-studio.com/nexus/cards/62.png,Epic,Minion,Crusade,Haste
+63,Uneasy Tombs,Undead soldier with enduring spirit.,https://assets.grudge-studio.com/nexus/cards/63.png,Common,Minion,Legion,Battlecry: Summon a 1/1 Grudge with Taunt.
+64,Gabsiona Federi,Human wizard casting powerful spells.,https://assets.grudge-studio.com/nexus/cards/64.png,Common,Minion,Crusade,Taunt
+65,Sergeant of the Mace,Human archer with deadly precision.,https://assets.grudge-studio.com/nexus/cards/65.png,Common,Minion,Crusade,Battlecry: Deal 2 damage to all enemy minions.
+66,Clever Neve,Undead warrior with cunning tactics.,https://assets.grudge-studio.com/nexus/cards/66.png,Uncommon,Minion,Elf,Battlecry: Draw a card.
+67,Double Shot,Undead archer with ghostly arrows.,https://assets.grudge-studio.com/nexus/cards/67.png,Common,Minion,Crusade,Battlecry: Deal 2 damage to an enemy minion.
+68,Wise Stien,Explosive barrel used as a weapon.,https://assets.grudge-studio.com/nexus/cards/68.png,Common,Minion,Crusade,
+69,Gorgoz,Orc archer with a heavy bow.,https://assets.grudge-studio.com/nexus/cards/69.png,Common,Minion,Legion,Battlecry: Deal 2 damage to an enemy.
+70,Matra Healer,Heals allies with divine light.,https://assets.grudge-studio.com/nexus/cards/70.png,Uncommon,Minion,Elf,Battlecry: Restore 4 Health to a friendly minion.
+71,Arturo of the South,Protects with holy power.,https://assets.grudge-studio.com/nexus/cards/71.png,Common,Minion,Crusade,Battlecry: Deal 3 damage to an enemy minion.
+72,Gruuubk,Heavy orc with a massive axe.,https://assets.grudge-studio.com/nexus/cards/72.png,Uncommon,Minion,Legion,Taunt
+73,Champion of Hope,Heavily armored human warrior.,https://assets.grudge-studio.com/nexus/cards/73.png,Common,Minion,Crusade,Taunt. Battlecry: Restore 5 Health to all friendly characters.
+74,Hope's Demand,Undead giant with a spiked club.,https://assets.grudge-studio.com/nexus/cards/74.png,Uncommon,Minion,Crusade,Battlecry: Give all friendly minions +1/+1.
+75,WareTree,Living tree that attacks with roots.,https://assets.grudge-studio.com/nexus/cards/75.png,Uncommon,Minion,Elf,Taunt
+76,Small Troll,Small troll with regenerative powers.,https://assets.grudge-studio.com/nexus/cards/76.png,Common,Minion,Legion,
+77,John Wayne: Captain,Commands the skies with grit and guile.,https://assets.grudge-studio.com/nexus/cards/77.png,Epic,Minion,Ship,Battlecry: Deal 2 damage to all enemy minions. Stealth.
+78,Dwarf Enforcer,Heavy dwarf with a warhammer.,https://assets.grudge-studio.com/nexus/cards/78.png,Uncommon,Minion,Crusade,Taunt
+79,Scourge,Dark familiar that boosts spells.,https://assets.grudge-studio.com/nexus/cards/79.png,Epic,Minion,Legion,Battlecry: Deal 2 damage to all enemy minions.
+80,Faith Bearer,"Alvon's priest, uniting its champions.",https://assets.grudge-studio.com/nexus/cards/80.png,Legendary,Hero,Crusade,Battlecry: Give all friendly minions Gold Shield.
+81,Glorified Ending,A fiery judgment upon the battlefield.,https://assets.grudge-studio.com/nexus/cards/81.png,Uncommon,Spell,Spell,Destroy an enemy minion.
+82,Clasmic Bolt,A surge of energy that scorches foes.,https://assets.grudge-studio.com/nexus/cards/82.png,Rare,Spell,Spell,Deal 5 damage to all enemy characters.
+83,Spell Hammer,A mystic strike that fuels sorcery.,https://assets.grudge-studio.com/nexus/cards/83.png,Common,Spell,Spell,Deal 3 damage to a random enemy and draw a card.
+84,Swirling Storm,A tempest that tears through ranks.,https://assets.grudge-studio.com/nexus/cards/84.png,Epic,Spell,Spell,Deal 4 damage to all enemy minions.
+85,Fireball,A blazing orb of destruction.,https://assets.grudge-studio.com/nexus/cards/85.png,Rare,Spell,Spell,Deal 6 damage to a target.
+86,Swipe of the Mage,A flick of the wrist weakens foes.,https://assets.grudge-studio.com/nexus/cards/86.png,Rare,Spell,Spell,Take control of an enemy minion with 3 or less Attack.
+87,Forged Weapons,"Fresh from the forge, blades thirst for battle.",https://assets.grudge-studio.com/nexus/cards/87.png,Common,Spell,Spell,Give all friendly minions +2 Attack this turn.
+88,Special Noise!,A discordant cry that bolsters allies.,https://assets.grudge-studio.com/nexus/cards/88.png,Epic,Spell,Spell,Give friendly minions +2 Health and deal 2 damage to all enemy minions.
+89,Book,Ancient pages hold forgotten secrets.,https://assets.grudge-studio.com/nexus/cards/89.png,Common,Spell,Spell,Draw 2 cards.
+90,Light,A radiant glow that mends the broken.,https://assets.grudge-studio.com/nexus/cards/90.png,Common,Spell,Spell,Restore 4 Health to a friendly character.
+91,Meat!,A feast that fuels enduring strength.,https://assets.grudge-studio.com/nexus/cards/91.png,Uncommon,Spell,Spell,Restore 6 Health to a friendly character.
+92,Brothers Keeper,"Alvon's vow, a shield for its champions.",https://assets.grudge-studio.com/nexus/cards/92.png,Legendary,Hero,Spell,Deal 7 damage to all enemy minions.
+93,Mystic Green,A verdant surge that renews life.,https://assets.grudge-studio.com/nexus/cards/93.png,Rare,Spell,Spell,Restore 5 Health to all friendly characters.
+94,Skull Magic,Dark sorcery that binds death to life.,https://assets.grudge-studio.com/nexus/cards/94.png,Rare,Spell,Spell,Deal 6 damage to a target and summon a 2/2 Grudge.
+95,Green Skull Magic,A twisted spell that takes and gives.,https://assets.grudge-studio.com/nexus/cards/95.png,Rare,Spell,Spell,Deal 5 damage to a target and restore 5 Health to your hero.
+96,Small Building,Defensive structure for enduring battles.,https://assets.grudge-studio.com/nexus/cards/96.png,Common,Minion,Crusade,Taunt. At the start of your turn: Gain +1 Attack.
+97,Summoning Tower,Summons spirits to guard the field.,https://assets.grudge-studio.com/nexus/cards/97.png,Common,Minion,Crusade,At the end of your turn: Give all friendly minions +1 Attack.
+98,Armory,Forges weapons to empower allies.,https://assets.grudge-studio.com/nexus/cards/98.png,Epic,Minion,Crusade,At the end of your turn: Give all friendly minions +1 Health.
+99,Hero Hall,Boosts heroes with legendary might.,https://assets.grudge-studio.com/nexus/cards/99.png,Common,Minion,Crusade,At the end of your turn: Give all friendly minions +1 Attack and summon a 1/1 Grudge with Taunt.
+100,Farm,Nourishes warriors with vital strength.,https://assets.grudge-studio.com/nexus/cards/100.png,Common,Minion,Crusade,At the end of your turn: Give all friendly minions +1 Health.
+101,Grudge,"A restless spirit, bound to serve any master.",https://assets.grudge-studio.com/nexus/cards/101.png,Common,StarterM,StarterM,
+102,Sling Shot,"A simple weapon, deadly in skilled hands.",https://assets.grudge-studio.com/nexus/cards/102.png,Common,StarterM,StarterM,
