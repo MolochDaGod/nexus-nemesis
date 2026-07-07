@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 const fetch = require('node-fetch');
 
 const JWT_SECRET = process.env.GRUDGE_JWT_SECRET;
-const AUTH_GATEWAY_URL = process.env.GRUDGE_AUTH_URL || 'https://auth-gateway-otb8qmmyd-grudgenexus.vercel.app';
+const AUTH_GATEWAY_URL = process.env.GRUDGE_AUTH_URL || 'https://id.grudge-studio.com';
 
 // In-memory token cache (verified token → user data, TTL 5 min)
 // Prevents re-verification on rapid successive requests
