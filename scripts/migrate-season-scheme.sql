@@ -1,6 +1,6 @@
 -- Nexus Nemesis season scheme migration
 -- Season 0 = library / legacy no-tribe
--- Season 1 = tribe pack pool (max 1,000,000)
+-- Season 1 = tribe pack pool (max 100,000)
 
 -- 1) Existing real-tribe inventory becomes Season 1 pack stock
 UPDATE nexus_cards

@@ -1,10 +1,11 @@
 // Nexus Nemesis — Tribe Configuration
-// Season 0 = library / legacy decks (no tribe). Season 1 packs mint tribe cards from 1M supply.
+// Season 0 = all cards so far / library / decks (no tribe).
+// Season 1 = pack openings only — exactly 100,000 tribe cards.
 
 const CDN = 'https://assets.grudge-studio.com/nexus/tribes';
 
-/** Global cNFT supply for Season 1 tribe pack mints */
-const SEASON1_MAX_SUPPLY = 1_000_000;
+/** Global cNFT supply for Season 1 tribe pack mints (not 1M) */
+const SEASON1_MAX_SUPPLY = 100_000;
 const SEASON_LIBRARY = 'Season 0';
 const SEASON_TRIBE = 'Season 1';
 
@@ -96,17 +97,16 @@ const PACK_CONFIG = {
   legendary: { cards: 3,  cost: 100, traitChance: 0.20, abilityChance: 0.05 },
 };
 
-// Rarity -> copies per base card (tuned to hit ~1M total for Season 1 pre-seed)
-// Actual minting is mint-on-demand capped at SEASON1_MAX_SUPPLY.
+// Rarity -> copies per base card (tuned to hit exactly 100K Season 1 tribe supply)
 const RARITY_SUPPLY = {
-  'Common':      14000,
-  'CommonHC':    12000,
-  'Uncommon':    6000,
-  'Uncommonhc':  6000,
-  'Rare':        4000,
-  'Epic':        2500,
-  'Legendary':   1000,
-  'StarterM':    73500,
+  'Common':      1400,
+  'CommonHC':    1200,
+  'Uncommon':    600,
+  'Uncommonhc':  600,
+  'Rare':        400,
+  'Epic':        250,
+  'Legendary':   100,
+  'StarterM':    7350,
 };
 
 const BONUS_ABILITIES = ['Haste', 'Stealth', 'Ally Boost', 'Heal on Play', 'Gold Shield', 'Double Strike'];

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// Nexus Nemesis — Generate Season 1 tribe cards (default 1,000,000)
+// Nexus Nemesis — Generate Season 1 tribe cards (default 100,000)
 // Usage: node scripts/generate-cards.js
-// Optional: TARGET_TOTAL=100000 node scripts/generate-cards.js  (smaller seed)
+// Optional: TARGET_TOTAL=50000 node scripts/generate-cards.js
 
 const fs = require('fs');
 const path = require('path');

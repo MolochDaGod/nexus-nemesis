@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Apply Season 0 (no-tribe library) / Season 1 (tribe packs, 1M) scheme to nexus_cards.
+ * Apply Season 0 (no-tribe) / Season 1 (tribe packs, 100K) scheme to nexus_cards.
  * Usage: node scripts/migrate-season-scheme.js
  * Requires DATABASE_URL (or .env.local from vercel env pull).
  */
@@ -53,7 +53,7 @@ async function main() {
     FROM nexus_cards
   `);
   console.log('Totals:', totals.rows[0]);
-  console.log('Season 1 max supply target: 1,000,000 (mint-on-demand fills the rest)');
+  console.log('Season 1 max supply target: 100,000 tribe cards');
 
   await pool.end();
 }

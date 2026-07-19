@@ -342,7 +342,7 @@ module.exports = function createNexusRouter(pool, auth = {}) {
 
       // TODO: Verify GBUX payment on-chain before proceeding
 
-      // Season 1 supply: real tribe cards count toward 1,000,000 max
+      // Season 1 supply: real tribe cards count toward 100,000 max
       const { rows: allTribeCount } = await client.query(
         `SELECT COUNT(*)::int AS total FROM nexus_cards
          WHERE tribe IS NOT NULL AND tribe <> $1 AND tribe <> ''`,
@@ -395,12 +395,12 @@ module.exports = function createNexusRouter(pool, auth = {}) {
         remaining -= rows.length;
       }
 
-      // Mint-on-demand: create new Season 1 tribe cards up to 1M supply
+      // Mint-on-demand: only if Season 1 pool still has headroom under 100K
       if (remaining > 0 && baseCardRows.length > 0) {
         const room = Math.max(0, SEASON1_MAX_SUPPLY - totalTribeSupply);
         const toCreate = Math.min(remaining, room);
         if (toCreate < remaining && room === 0) {
-          // No room and no pool left
+          // Sold out at 100K
         } else if (toCreate > 0) {
           const { rows: numRows } = await client.query(
             `SELECT COALESCE(MAX(card_number), 0) AS max_num FROM nexus_cards`
@@ -461,7 +461,7 @@ module.exports = function createNexusRouter(pool, auth = {}) {
         await client.query('ROLLBACK');
         return res.status(503).json({
           error: totalTribeSupply >= SEASON1_MAX_SUPPLY
-            ? 'Season 1 tribe supply is sold out (1,000,000).'
+            ? 'Season 1 tribe supply is sold out (100,000).'
             : 'No Season 1 tribe cards available to open.',
         });
       }
@@ -639,7 +639,7 @@ module.exports = function createNexusRouter(pool, auth = {}) {
         season: SEASON_TRIBE,
         scheme: {
           season0: 'Library / legacy decks — no tribe',
-          season1: 'Pack openings — tribe cards from 1,000,000 supply',
+          season1: 'Pack openings — 100,000 tribe cards only',
         },
         maxSupply: SEASON1_MAX_SUPPLY,
         maxCount: SEASON1_MAX_SUPPLY,

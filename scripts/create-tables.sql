@@ -1,6 +1,6 @@
 -- Nexus Nemesis card production schema
 -- Season 0 = library / legacy no-tribe
--- Season 1 = tribe packs (up to 1,000,000 via pre-seed + mint-on-demand)
+-- Season 1 = tribe packs only (100,000 max)
 -- Connects to Grudge backend PostgreSQL
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -8,7 +8,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Card inventory (Season 1 tribe pool + Season 0 library instances)
 CREATE TABLE IF NOT EXISTS nexus_cards (
   id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  card_number     INTEGER UNIQUE NOT NULL,          -- sequential global id (1..1M+)
+  card_number     INTEGER UNIQUE NOT NULL,          -- sequential global id (1..100000+)
   base_card_id    INTEGER NOT NULL,                  -- references cards-base.csv external_id
   name            TEXT NOT NULL,
   description     TEXT,

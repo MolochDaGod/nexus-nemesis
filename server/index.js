@@ -90,7 +90,7 @@ app.get('/', (req, res) => {
       library: 'Season 0 (no tribe)',
       packs: 'Season 1 (tribe cards)',
     },
-    season1MaxSupply: 1_000_000,
+    season1MaxSupply: 100_000,
     auth: 'Bearer token required for protected endpoints',
     endpoints: {
       public: [
@@ -121,7 +121,7 @@ app.get('/api/health', async (req, res) => {
     service: 'nexus-nemesis',
     seasonLibrary: 'Season 0',
     seasonPacks: 'Season 1',
-    maxSupply: 1_000_000,
+    maxSupply: 100_000,
     db: dbOk ? 'connected' : 'unreachable',
     env: IS_SERVERLESS ? 'serverless' : 'vps',
   });

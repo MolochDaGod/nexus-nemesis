@@ -1,7 +1,7 @@
 {
   "name": "grudge-tcg-nexus",
   "version": "1.0.0",
-  "description": "Nexus Nemesis — Season 0 library (no tribe) + Season 1 tribe packs (1M supply)",
+  "description": "Nexus Nemesis — Season 0 no-tribe + Season 1 tribe packs (100K supply)",
   "main": "server/index.js",
   "scripts": {
     "generate": "node scripts/generate-cards.js",

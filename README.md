@@ -1,7 +1,7 @@
 # Nexus Nemesis — Season 0 library + Season 1 tribe packs
 
-Season **0** = library / legacy decks (**no tribe**).  
-Season **1** = pack openings mint **tribe cards** from a **1,000,000** supply (pre-seed + mint-on-demand).
+Season **0** = everything so far — library, decks, legacy (**no tribe**).  
+Season **1** = pack openings only — **100,000** tribe cards total.
 
 ## Architecture
 
@@ -23,8 +23,8 @@ Season **1** = pack openings mint **tribe cards** from a **1,000,000** supply (p
 
 ## Card Supply
 
-- **Season 1 tribe max**: 1,000,000 from 102 base designs (mint-on-demand after seed)
-- **Season 0 library**: unlimited no-tribe instances (does not consume tribe supply)
+- **Season 1 tribe max**: **100,000** from 102 base designs
+- **Season 0**: all current cards / library / decks — no tribe
 - **Rarities**: Common, CommonHC, Uncommon, Uncommonhc, Rare, Epic, Legendary, StarterM
 
 ### Tribe Distribution
