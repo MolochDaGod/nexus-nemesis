@@ -1,7 +1,15 @@
 // Nexus Nemesis — Tribe Configuration
-// Tribes are assigned at mint via weighted random roll, independent of base card subtype.
+// Season 0 = library / legacy decks (no tribe). Season 1 packs mint tribe cards from 1M supply.
 
 const CDN = 'https://assets.grudge-studio.com/nexus/tribes';
+
+/** Global cNFT supply for Season 1 tribe pack mints */
+const SEASON1_MAX_SUPPLY = 1_000_000;
+const SEASON_LIBRARY = 'Season 0';
+const SEASON_TRIBE = 'Season 1';
+
+/** Display / DB name for no-tribe library instances */
+const LIBRARY_TRIBE = 'Library';
 
 const TRIBES = {
   'Iron Will': {
@@ -88,16 +96,17 @@ const PACK_CONFIG = {
   legendary: { cards: 3,  cost: 100, traitChance: 0.20, abilityChance: 0.05 },
 };
 
-// Rarity -> copies per base card (tuned to hit 100K total)
+// Rarity -> copies per base card (tuned to hit ~1M total for Season 1 pre-seed)
+// Actual minting is mint-on-demand capped at SEASON1_MAX_SUPPLY.
 const RARITY_SUPPLY = {
-  'Common':      1400,
-  'CommonHC':    1200,
-  'Uncommon':    600,
-  'Uncommonhc':  600,
-  'Rare':        400,
-  'Epic':        250,
-  'Legendary':   100,
-  'StarterM':    7350,
+  'Common':      14000,
+  'CommonHC':    12000,
+  'Uncommon':    6000,
+  'Uncommonhc':  6000,
+  'Rare':        4000,
+  'Epic':        2500,
+  'Legendary':   1000,
+  'StarterM':    73500,
 };
 
 const BONUS_ABILITIES = ['Haste', 'Stealth', 'Ally Boost', 'Heal on Play', 'Gold Shield', 'Double Strike'];
@@ -151,6 +160,10 @@ module.exports = {
   RARITY_SUPPLY,
   BONUS_ABILITIES,
   RARE_TRAITS,
+  SEASON1_MAX_SUPPLY,
+  SEASON_LIBRARY,
+  SEASON_TRIBE,
+  LIBRARY_TRIBE,
   rollTribe,
   rollTraits,
   rollBonusAbilities,

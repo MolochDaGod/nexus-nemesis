@@ -38,13 +38,17 @@ const ALLOWED_ORIGINS = [
   'https://grudgewarlords.com',
   'https://grudge-warlords-game.vercel.app',
   'https://grudge-studio.com',
+  'https://www.grudge-studio.com',
   'https://nexus.grudge-studio.com',
+  'https://nemesis.grudge-studio.com',
   'https://dash.grudge-studio.com',
+  'https://id.grudge-studio.com',
 ];
 // Also allow any *.vercel.app preview deploy + localhost for dev
 const ALLOWED_ORIGIN_PATTERNS = [
   /^https:\/\/[a-z0-9-]+-grudgenexus\.vercel\.app$/,
   /^https:\/\/nexus-nemesis[a-z0-9-]*\.vercel\.app$/,
+  /^https:\/\/[a-z0-9-]+\.grudge-studio\.com$/,
   /^http:\/\/localhost:\d+$/,
 ];
 
@@ -82,19 +86,24 @@ app.get('/favicon.ico', (req, res) => res.status(204).end());
 app.get('/', (req, res) => {
   res.json({
     service: 'Nexus Nemesis',
-    season: 'Season 0',
-    supply: 100000,
+    seasons: {
+      library: 'Season 0 (no tribe)',
+      packs: 'Season 1 (tribe cards)',
+    },
+    season1MaxSupply: 1_000_000,
     auth: 'Bearer token required for protected endpoints',
     endpoints: {
       public: [
         'GET  /api/health',
         'GET  /api/nexus/stats',
+        'GET  /api/nexus/library',
         'GET  /api/nexus/card/:uuid',
         'POST /api/nexus/webhook',
       ],
       protected: [
         'GET  /api/nexus/cards/:grudgeId  (auth required)',
-        'POST /api/nexus/pack/buy         (auth required)',
+        'POST /api/nexus/pack/buy         (auth required) — Season 1 tribe packs',
+        'POST /api/nexus/library/buy      — Season 0 no-tribe',
       ],
     },
   });
@@ -110,7 +119,9 @@ app.get('/api/health', async (req, res) => {
   res.json({
     status: dbOk ? 'ok' : 'degraded',
     service: 'nexus-nemesis',
-    season: 'Season 0',
+    seasonLibrary: 'Season 0',
+    seasonPacks: 'Season 1',
+    maxSupply: 1_000_000,
     db: dbOk ? 'connected' : 'unreachable',
     env: IS_SERVERLESS ? 'serverless' : 'vps',
   });

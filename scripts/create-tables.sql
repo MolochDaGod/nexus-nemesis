@@ -1,12 +1,14 @@
--- Nexus Nemesis Season 0 — 100K Card Production Schema
+-- Nexus Nemesis card production schema
+-- Season 0 = library / legacy no-tribe
+-- Season 1 = tribe packs (up to 1,000,000 via pre-seed + mint-on-demand)
 -- Connects to Grudge backend PostgreSQL
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- The 100K pre-generated card pool
+-- Card inventory (Season 1 tribe pool + Season 0 library instances)
 CREATE TABLE IF NOT EXISTS nexus_cards (
   id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  card_number     INTEGER UNIQUE NOT NULL,          -- 1-100000
+  card_number     INTEGER UNIQUE NOT NULL,          -- sequential global id (1..1M+)
   base_card_id    INTEGER NOT NULL,                  -- references cards-base.csv external_id
   name            TEXT NOT NULL,
   description     TEXT,
@@ -15,7 +17,7 @@ CREATE TABLE IF NOT EXISTS nexus_cards (
   type            TEXT NOT NULL,                     -- Minion/Spell/Hero/StarterM
   subtype         TEXT NOT NULL,                     -- Crusade/Legion/Elf/Ship/Spell/Lore/Celestial/StarterM
   abilities       TEXT,
-  tribe           TEXT NOT NULL,                     -- Iron Will/Blood For Conquest/Fabled/Tribal War/Ethereal Signature
+  tribe           TEXT NOT NULL,                     -- Iron Will/Blood For Conquest/Fabled/Tribal War/Ethereal Signature/Library
   tribe_bg        TEXT NOT NULL,                     -- card background image URL
   tribe_border    TEXT NOT NULL,                     -- hex border color
   attack          INTEGER NOT NULL DEFAULT 0,
@@ -25,7 +27,7 @@ CREATE TABLE IF NOT EXISTS nexus_cards (
   bonus_abilities TEXT[] NOT NULL DEFAULT '{}',      -- extra Haste/Stealth/Ally Boost from roll
   is_signature    BOOLEAN NOT NULL DEFAULT FALSE,
   edition         TEXT NOT NULL,                     -- e.g. "#342 of 1400"
-  season          TEXT NOT NULL DEFAULT 'Season 0',
+  season          TEXT NOT NULL DEFAULT 'Season 1', -- Season 0 = no tribe, Season 1 = tribe packs
   mint_status     TEXT NOT NULL DEFAULT 'unminted'
     CHECK (mint_status IN ('unminted', 'minting', 'minted', 'assigned', 'pending')),
   crossmint_id    TEXT,                              -- cNFT action ID from Crossmint

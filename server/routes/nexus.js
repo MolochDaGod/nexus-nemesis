@@ -7,7 +7,18 @@ const fetch = require('node-fetch');
 const { v4: uuidv4 } = require('uuid');
 const { parse } = require('csv-parse/sync');
 const rateLimit = require('express-rate-limit');
-const { PACK_CONFIG, PACK_TRIBE_WEIGHTS, TRIBES, rollTraits, rollBonusAbilities } = require('../lib/tribe-config');
+const {
+  PACK_CONFIG,
+  PACK_TRIBE_WEIGHTS,
+  TRIBES,
+  SEASON1_MAX_SUPPLY,
+  SEASON_LIBRARY,
+  SEASON_TRIBE,
+  LIBRARY_TRIBE,
+  rollTribe,
+  rollTraits,
+  rollBonusAbilities,
+} = require('../lib/tribe-config');
 const { mintCardToRecipient } = require('../lib/crossmint');
 const { generateLibraryPrices, getLibraryPrices, calculateLibraryPrice } = require('../lib/library-pricing');
 
@@ -45,12 +56,14 @@ module.exports = function createNexusRouter(pool, auth = {}) {
 
   // ── Load base cards & compute library prices on startup ────────
   let libraryCards = [];
+  /** Raw CSV rows for Season 1 mint-on-demand pack generation */
+  let baseCardRows = [];
   try {
     const csvPath = path.resolve(__dirname, '..', '..', 'cards-base.csv');
     const csvRaw = fs.readFileSync(csvPath, 'utf-8');
-    const baseCards = parse(csvRaw, { columns: true, skip_empty_lines: true, trim: true });
-    const prices = generateLibraryPrices(baseCards);
-    libraryCards = baseCards.map(card => {
+    baseCardRows = parse(csvRaw, { columns: true, skip_empty_lines: true, trim: true });
+    const prices = generateLibraryPrices(baseCardRows);
+    libraryCards = baseCardRows.map(card => {
       const p = prices[card.external_id] || { price: 2, tier: 'common' };
       return {
         id: parseInt(card.external_id),
@@ -66,30 +79,89 @@ module.exports = function createNexusRouter(pool, auth = {}) {
       };
     });
     console.log(`Library loaded: ${libraryCards.length} base cards, price range ${Math.min(...libraryCards.map(c => c.gbuxPrice))}–${Math.max(...libraryCards.map(c => c.gbuxPrice))} GBUX`);
+    console.log(`Season 1 pack mint-on-demand ready (max supply ${SEASON1_MAX_SUPPLY})`);
   } catch (err) {
     console.error('Failed to load library cards:', err.message);
   }
 
+  /**
+   * Build one Season 1 tribe card row (mint-on-demand).
+   * Stats match generate-cards.js so pre-seeded and on-demand cards feel the same.
+   */
+  function buildSeason1CardInstance(baseCard, cardNumber, tribeName) {
+    const tribe = tribeName || rollTribe();
+    const tribeConfig = TRIBES[tribe] || TRIBES['Iron Will'];
+    const traits = rollTraits();
+    const bonusAbilities = rollBonusAbilities();
+
+    let attack = 0;
+    let health = 0;
+    let manaCost = 0;
+    if (baseCard.type === 'Minion' || baseCard.type === 'Hero') {
+      const rarityMultiplier = {
+        Common: 1, CommonHC: 1.2, Uncommon: 1.5, Uncommonhc: 1.5,
+        Rare: 2, Epic: 2.5, Legendary: 3, StarterM: 0.5,
+      }[baseCard.rarity] || 1;
+      attack = Math.max(1, Math.floor((1 + Math.random() * 3) * rarityMultiplier));
+      health = Math.max(1, Math.floor((1 + Math.random() * 4) * rarityMultiplier));
+      manaCost = Math.max(1, Math.floor(1 + Math.random() * 5 * (rarityMultiplier * 0.6)));
+    } else if (baseCard.type === 'Spell') {
+      manaCost = Math.max(1, Math.floor(2 + Math.random() * 6));
+    } else if (baseCard.type === 'StarterM') {
+      attack = 1; health = 1; manaCost = 1;
+    }
+
+    const isSignature = tribe === 'Ethereal Signature';
+    if (isSignature) {
+      attack += 2;
+      health += 2;
+      manaCost = Math.max(0, manaCost - 1);
+    }
+    if (traits.life) health += 1;
+    if (traits.fire) attack += 1;
+
+    return {
+      id: uuidv4(),
+      card_number: cardNumber,
+      base_card_id: parseInt(baseCard.external_id, 10),
+      name: baseCard.name,
+      description: baseCard.description || '',
+      image_url: baseCard.image,
+      rarity: baseCard.rarity,
+      type: baseCard.type,
+      subtype: baseCard.subtype,
+      abilities: baseCard.abilities || '',
+      tribe,
+      tribe_bg: tribeConfig.background || '',
+      tribe_border: tribeConfig.borderColor || '',
+      attack,
+      health,
+      mana_cost: manaCost,
+      traits,
+      bonus_abilities: bonusAbilities,
+      is_signature: isSignature,
+      edition: `#${cardNumber}`,
+      season: SEASON_TRIBE,
+      mint_status: 'unminted',
+    };
+  }
+
   // ── GET /api/nexus/library ──────────────────────────────────────
-  // Returns all 102 base cards with fixed GBUX prices (no tribe, no rarity roll)
+  // Season 0 catalog: fixed GBUX prices, no tribe, unlimited mint-on-demand
   router.get('/library', async (req, res) => {
     try {
-      // Optionally get stock counts per base card
-      const { rows: stockRows } = await pool.query(
-        `SELECT base_card_id, COUNT(*) as available
-         FROM nexus_cards
-         WHERE owner_grudge_id IS NULL AND mint_status IN ('unminted', 'minted')
-         GROUP BY base_card_id`
-      );
-      const stock = Object.fromEntries(stockRows.map(r => [r.base_card_id, parseInt(r.available)]));
-
       const cards = libraryCards.map(card => ({
         ...card,
-        available: stock[card.id] || 0,
+        // Library is mint-on-demand Season 0 — always available
+        available: null,
+        unlimited: true,
+        season: SEASON_LIBRARY,
+        tribe: null,
       }));
 
       res.json({
-        season: 'Season 0',
+        season: SEASON_LIBRARY,
+        scheme: 'no-tribe',
         totalCards: cards.length,
         cards,
       });
@@ -100,7 +172,7 @@ module.exports = function createNexusRouter(pool, auth = {}) {
   });
 
   // ── POST /api/nexus/library/buy ─────────────────────────────────
-  // Buy a specific base card at its fixed GBUX price (no tribe roll)
+  // Season 0: mint a no-tribe Library instance (does NOT consume Season 1 pool)
   router.post('/library/buy', async (req, res) => {
     const { grudgeId, baseCardId } = req.body;
 
@@ -110,7 +182,8 @@ module.exports = function createNexusRouter(pool, auth = {}) {
 
     const cardId = parseInt(baseCardId);
     const libCard = libraryCards.find(c => c.id === cardId);
-    if (!libCard) {
+    const baseRow = baseCardRows.find(c => parseInt(c.external_id, 10) === cardId);
+    if (!libCard || !baseRow) {
       return res.status(404).json({ error: `Base card ${baseCardId} not found in library` });
     }
 
@@ -118,40 +191,86 @@ module.exports = function createNexusRouter(pool, auth = {}) {
     try {
       await client.query('BEGIN');
 
-      // TODO: Verify GBUX balance via blockchain/backend
-      // For now, trust the caller has verified payment (same pattern as pack/buy)
-
-      // Find one unassigned card matching this base_card_id
-      const { rows } = await client.query(
+      // Prefer reusing an unowned Season 0 / Library copy of this base card
+      let assignedCardId = null;
+      const { rows: existing } = await client.query(
         `SELECT id FROM nexus_cards
-         WHERE base_card_id = $1 AND owner_grudge_id IS NULL
+         WHERE base_card_id = $1
+           AND owner_grudge_id IS NULL
+           AND (season = $2 OR tribe = $3 OR tribe = '' OR tribe IS NULL)
          ORDER BY card_number ASC
          LIMIT 1
          FOR UPDATE SKIP LOCKED`,
-        [cardId]
+        [cardId, SEASON_LIBRARY, LIBRARY_TRIBE]
       );
 
-      if (rows.length === 0) {
-        await client.query('ROLLBACK');
-        return res.status(503).json({ error: `No copies of "${libCard.name}" available. Sold out!` });
+      if (existing.length > 0) {
+        assignedCardId = existing[0].id;
+        await client.query(
+          `UPDATE nexus_cards
+           SET owner_grudge_id = $1,
+               tribe = $2,
+               tribe_bg = '',
+               tribe_border = '',
+               season = $3,
+               is_signature = FALSE,
+               mint_status = 'assigned',
+               assigned_at = NOW()
+           WHERE id = $4`,
+          [grudgeId, LIBRARY_TRIBE, SEASON_LIBRARY, assignedCardId]
+        );
+      } else {
+        // Mint-on-demand Season 0 no-tribe instance (separate card_number sequence)
+        const { rows: numRows } = await client.query(
+          `SELECT COALESCE(MAX(card_number), 0) + 1 AS next_num FROM nexus_cards`
+        );
+        const nextNum = parseInt(numRows[0].next_num, 10);
+        const id = uuidv4();
+        await client.query(
+          `INSERT INTO nexus_cards (
+             id, card_number, base_card_id, name, description, image_url,
+             rarity, type, subtype, abilities, tribe, tribe_bg, tribe_border,
+             attack, health, mana_cost, traits, bonus_abilities, is_signature,
+             edition, season, mint_status, owner_grudge_id, assigned_at
+           ) VALUES (
+             $1, $2, $3, $4, $5, $6,
+             $7, $8, $9, $10, $11, '', '',
+             $12, $13, $14, '{}'::jsonb, '{}', FALSE,
+             $15, $16, 'assigned', $17, NOW()
+           )`,
+          [
+            id,
+            nextNum,
+            cardId,
+            libCard.name,
+            libCard.description || '',
+            libCard.image,
+            libCard.rarity,
+            libCard.type,
+            libCard.subtype,
+            libCard.abilities || '',
+            LIBRARY_TRIBE,
+            0,
+            0,
+            0,
+            `#${nextNum} Library`,
+            SEASON_LIBRARY,
+            grudgeId,
+          ]
+        );
+        // Fill base combat stats from template ranges lightly
+        const inst = buildSeason1CardInstance(baseRow, nextNum, 'Iron Will');
+        await client.query(
+          `UPDATE nexus_cards
+           SET attack = $1, health = $2, mana_cost = $3,
+               tribe = $4, tribe_bg = '', tribe_border = '',
+               is_signature = FALSE, season = $5
+           WHERE id = $6`,
+          [inst.attack, inst.health, inst.mana_cost, LIBRARY_TRIBE, SEASON_LIBRARY, id]
+        );
+        assignedCardId = id;
       }
 
-      const assignedCardId = rows[0].id;
-
-      // Assign card — Library purchase: tribe = 'Library', no tribe roll
-      await client.query(
-        `UPDATE nexus_cards
-         SET owner_grudge_id = $1,
-             tribe = 'Library',
-             tribe_bg = '',
-             tribe_border = '',
-             mint_status = 'assigned',
-             assigned_at = NOW()
-         WHERE id = $2`,
-        [grudgeId, assignedCardId]
-      );
-
-      // Log library purchase
       await client.query(
         `INSERT INTO nexus_library_purchases (grudge_id, base_card_id, card_id, gbux_price)
          VALUES ($1, $2, $3, $4)`,
@@ -160,7 +279,6 @@ module.exports = function createNexusRouter(pool, auth = {}) {
 
       await client.query('COMMIT');
 
-      // Fetch full card details
       const { rows: cardRows } = await pool.query(
         `SELECT * FROM nexus_cards WHERE id = $1`,
         [assignedCardId]
@@ -168,6 +286,8 @@ module.exports = function createNexusRouter(pool, auth = {}) {
 
       res.json({
         purchased: true,
+        season: SEASON_LIBRARY,
+        tribe: null,
         gbuxPrice: libCard.gbuxPrice,
         card: cardRows.length > 0 ? formatCard(cardRows[0]) : { id: assignedCardId },
       });
@@ -222,9 +342,18 @@ module.exports = function createNexusRouter(pool, auth = {}) {
 
       // TODO: Verify GBUX payment on-chain before proceeding
 
-      // Select random unassigned cards with tribe weighting
-      const weights = PACK_TRIBE_WEIGHTS[packType];
+      // Season 1 supply: real tribe cards count toward 1,000,000 max
+      const { rows: allTribeCount } = await client.query(
+        `SELECT COUNT(*)::int AS total FROM nexus_cards
+         WHERE tribe IS NOT NULL AND tribe <> $1 AND tribe <> ''`,
+        [LIBRARY_TRIBE]
+      );
+      const totalTribeSupply = allTribeCount[0]?.total || 0;
+
+      // Select unassigned tribe cards (never Library / empty tribe)
+      const weights = PACK_TRIBE_WEIGHTS[packType] || PACK_TRIBE_WEIGHTS.starter;
       const tribeOrder = Object.entries(weights).sort((a, b) => b[1] - a[1]);
+      const weightSum = tribeOrder.reduce((s, [, w]) => s + w, 0);
 
       const selectedCardIds = [];
       let remaining = config.cards;
@@ -232,13 +361,14 @@ module.exports = function createNexusRouter(pool, auth = {}) {
       for (const [tribe, weight] of tribeOrder) {
         const count = Math.max(
           remaining === config.cards ? 1 : 0,
-          Math.round(remaining * (weight / tribeOrder.reduce((s, [, w]) => s + w, 0)))
+          Math.round(remaining * (weight / weightSum))
         );
         if (count === 0) continue;
 
         const { rows } = await client.query(
           `SELECT id FROM nexus_cards
-           WHERE owner_grudge_id IS NULL AND tribe = $1
+           WHERE owner_grudge_id IS NULL
+             AND tribe = $1
            ORDER BY RANDOM()
            LIMIT $2
            FOR UPDATE SKIP LOCKED`,
@@ -250,33 +380,102 @@ module.exports = function createNexusRouter(pool, auth = {}) {
         if (remaining <= 0) break;
       }
 
-      // Fallback: grab any unassigned cards if tribe selection fell short
+      // Fallback: any unassigned real-tribe card (not Library)
       if (remaining > 0) {
         const { rows } = await client.query(
           `SELECT id FROM nexus_cards
            WHERE owner_grudge_id IS NULL
+             AND tribe IS NOT NULL AND tribe <> $1 AND tribe <> ''
            ORDER BY RANDOM()
-           LIMIT $1
+           LIMIT $2
            FOR UPDATE SKIP LOCKED`,
-          [remaining]
+          [LIBRARY_TRIBE, remaining]
         );
         selectedCardIds.push(...rows.map(r => r.id));
+        remaining -= rows.length;
+      }
+
+      // Mint-on-demand: create new Season 1 tribe cards up to 1M supply
+      if (remaining > 0 && baseCardRows.length > 0) {
+        const room = Math.max(0, SEASON1_MAX_SUPPLY - totalTribeSupply);
+        const toCreate = Math.min(remaining, room);
+        if (toCreate < remaining && room === 0) {
+          // No room and no pool left
+        } else if (toCreate > 0) {
+          const { rows: numRows } = await client.query(
+            `SELECT COALESCE(MAX(card_number), 0) AS max_num FROM nexus_cards`
+          );
+          let nextNum = parseInt(numRows[0].max_num, 10) + 1;
+
+          for (let i = 0; i < toCreate; i++) {
+            const tribe = rollTribe(weights);
+            const baseCard = baseCardRows[Math.floor(Math.random() * baseCardRows.length)];
+            const inst = buildSeason1CardInstance(baseCard, nextNum++, tribe);
+            const bonusArr = inst.bonus_abilities.length > 0
+              ? inst.bonus_abilities
+              : [];
+
+            await client.query(
+              `INSERT INTO nexus_cards (
+                 id, card_number, base_card_id, name, description, image_url,
+                 rarity, type, subtype, abilities, tribe, tribe_bg, tribe_border,
+                 attack, health, mana_cost, traits, bonus_abilities, is_signature,
+                 edition, season, mint_status
+               ) VALUES (
+                 $1, $2, $3, $4, $5, $6,
+                 $7, $8, $9, $10, $11, $12, $13,
+                 $14, $15, $16, $17::jsonb, $18, $19,
+                 $20, $21, 'unminted'
+               )`,
+              [
+                inst.id,
+                inst.card_number,
+                inst.base_card_id,
+                inst.name,
+                inst.description,
+                inst.image_url,
+                inst.rarity,
+                inst.type,
+                inst.subtype,
+                inst.abilities,
+                inst.tribe,
+                inst.tribe_bg,
+                inst.tribe_border,
+                inst.attack,
+                inst.health,
+                inst.mana_cost,
+                JSON.stringify(inst.traits),
+                bonusArr,
+                inst.is_signature,
+                inst.edition,
+                SEASON_TRIBE,
+              ]
+            );
+            selectedCardIds.push(inst.id);
+            remaining--;
+          }
+        }
       }
 
       if (selectedCardIds.length === 0) {
         await client.query('ROLLBACK');
-        return res.status(503).json({ error: 'No cards available. Season 0 may be sold out!' });
+        return res.status(503).json({
+          error: totalTribeSupply >= SEASON1_MAX_SUPPLY
+            ? 'Season 1 tribe supply is sold out (1,000,000).'
+            : 'No Season 1 tribe cards available to open.',
+        });
       }
 
-      // Assign cards to user + mark as minting
+      // Assign cards to user + mark as minting; force Season 1 + keep real tribe
       await client.query(
         `UPDATE nexus_cards
          SET owner_grudge_id = $1,
              owner_wallet = $2,
              mint_status = 'minting',
-             assigned_at = NOW()
-         WHERE id = ANY($3)`,
-        [grudgeId, wallet || null, selectedCardIds]
+             assigned_at = NOW(),
+             season = $3
+         WHERE id = ANY($4::uuid[])`,
+        [grudgeId, wallet || null, SEASON_TRIBE, selectedCardIds]
       );
 
       // Log pack purchase
@@ -347,10 +546,13 @@ module.exports = function createNexusRouter(pool, auth = {}) {
       res.json({
         packId,
         packType,
+        season: SEASON_TRIBE,
+        scheme: 'tribe',
         gbuxCost: config.cost,
         cardsReceived: cards.length,
         cards: cards.map(formatCard),
         minting: mintResults,
+        maxSupply: SEASON1_MAX_SUPPLY,
       });
     } catch (err) {
       await client.query('ROLLBACK');
@@ -401,23 +603,50 @@ module.exports = function createNexusRouter(pool, auth = {}) {
   });
 
   // ── GET /api/nexus/stats ───────────────────────────────────────
-  // Collection statistics
+  // Collection statistics — Season 0 library vs Season 1 tribe packs
   router.get('/stats', async (req, res) => {
     try {
-      const [total, byTribe, byRarity, byStatus] = await Promise.all([
+      const [total, byTribe, byRarity, byStatus, bySeason, tribePool, ownedTribe] = await Promise.all([
         pool.query(`SELECT COUNT(*) as total FROM nexus_cards`),
         pool.query(`SELECT tribe, COUNT(*) as count FROM nexus_cards GROUP BY tribe ORDER BY count DESC`),
         pool.query(`SELECT rarity, COUNT(*) as count FROM nexus_cards GROUP BY rarity ORDER BY count DESC`),
         pool.query(`SELECT mint_status, COUNT(*) as count FROM nexus_cards GROUP BY mint_status`),
+        pool.query(`SELECT COALESCE(season, 'unknown') as season, COUNT(*) as count FROM nexus_cards GROUP BY season ORDER BY count DESC`),
+        pool.query(
+          `SELECT COUNT(*)::int as total FROM nexus_cards
+           WHERE tribe IS NOT NULL AND tribe <> $1 AND tribe <> ''`,
+          [LIBRARY_TRIBE]
+        ),
+        pool.query(
+          `SELECT COUNT(*)::int as total FROM nexus_cards
+           WHERE owner_grudge_id IS NOT NULL
+             AND tribe IS NOT NULL AND tribe <> $1 AND tribe <> ''`,
+          [LIBRARY_TRIBE]
+        ),
       ]);
+
+      const tribeTotal = tribePool.rows[0]?.total || 0;
+      const tribeOwned = ownedTribe.rows[0]?.total || 0;
 
       res.json({
         total: parseInt(total.rows[0].total),
         byTribe: Object.fromEntries(byTribe.rows.map(r => [r.tribe, parseInt(r.count)])),
         byRarity: Object.fromEntries(byRarity.rows.map(r => [r.rarity, parseInt(r.count)])),
         byStatus: Object.fromEntries(byStatus.rows.map(r => [r.mint_status, parseInt(r.count)])),
-        season: 'Season 0',
-        maxSupply: 100000,
+        bySeason: Object.fromEntries(bySeason.rows.map(r => [r.season, parseInt(r.count)])),
+        seasonLibrary: SEASON_LIBRARY,
+        seasonPacks: SEASON_TRIBE,
+        season: SEASON_TRIBE,
+        scheme: {
+          season0: 'Library / legacy decks — no tribe',
+          season1: 'Pack openings — tribe cards from 1,000,000 supply',
+        },
+        maxSupply: SEASON1_MAX_SUPPLY,
+        maxCount: SEASON1_MAX_SUPPLY,
+        tribeSupply: tribeTotal,
+        tribeOwned,
+        remainingCards: Math.max(0, SEASON1_MAX_SUPPLY - tribeTotal),
+        totalMinted: tribeOwned,
       });
     } catch (err) {
       console.error('Stats error:', err);
@@ -545,7 +774,15 @@ module.exports = function createNexusRouter(pool, auth = {}) {
 
 // Format a DB row into a clean card object
 function formatCard(row) {
-  const tribeConfig = TRIBES[row.tribe] || {};
+  const isLibrary =
+    row.tribe === LIBRARY_TRIBE ||
+    row.tribe === '' ||
+    row.tribe == null ||
+    row.season === SEASON_LIBRARY;
+  const tribeConfig = (!isLibrary && TRIBES[row.tribe]) || {};
+  const season =
+    row.season ||
+    (isLibrary ? SEASON_LIBRARY : SEASON_TRIBE);
   return {
     id: row.id,
     cardNumber: row.card_number,
@@ -557,11 +794,13 @@ function formatCard(row) {
     type: row.type,
     subtype: row.subtype,
     abilities: row.abilities,
-    tribe: row.tribe,
-    tribeBg: row.tribe_bg,
-    tribeBorder: row.tribe_border,
-    tribeUpgrade: tribeConfig.upgrade,
-    tribeSpell: tribeConfig.spell,
+    // Season 0 library/legacy: no tribe for gameplay
+    tribe: isLibrary ? null : row.tribe,
+    tribeBg: isLibrary ? '' : row.tribe_bg,
+    tribeBorder: isLibrary ? '' : row.tribe_border,
+    tribeUpgrade: tribeConfig.upgrade || null,
+    tribeSpell: tribeConfig.spell || null,
+    isTribal: !isLibrary && !!row.tribe && row.tribe !== LIBRARY_TRIBE,
     attack: row.attack,
     health: row.health,
     manaCost: row.mana_cost,
@@ -569,7 +808,7 @@ function formatCard(row) {
     bonusAbilities: row.bonus_abilities,
     isSignature: row.is_signature,
     edition: row.edition,
-    season: row.season,
+    season,
     mintStatus: row.mint_status,
     crossmintId: row.crossmint_id,
     ownerGrudgeId: row.owner_grudge_id,

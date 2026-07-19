@@ -1,10 +1,11 @@
 {
   "name": "grudge-tcg-nexus",
   "version": "1.0.0",
-  "description": "Nexus Nemesis Season 0 — 100K cNFT Card Minting System",
+  "description": "Nexus Nemesis — Season 0 library (no tribe) + Season 1 tribe packs (1M supply)",
   "main": "server/index.js",
   "scripts": {
     "generate": "node scripts/generate-cards.js",
+    "migrate:season": "node scripts/migrate-season-scheme.js",
     "mint": "node scripts/mint-batch.js",
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",

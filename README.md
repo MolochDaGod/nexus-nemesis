@@ -1,6 +1,7 @@
-# Nexus Nemesis — Season 0
+# Nexus Nemesis — Season 0 library + Season 1 tribe packs
 
-100,000 compressed NFT (cNFT) trading card system for Grudge Studio's Nexus Nemesis TCG on Solana.
+Season **0** = library / legacy decks (**no tribe**).  
+Season **1** = pack openings mint **tribe cards** from a **1,000,000** supply (pre-seed + mint-on-demand).
 
 ## Architecture
 
@@ -20,9 +21,10 @@
 | `POST` | `/api/nexus/pack/buy` | Buy & open a card pack |
 | `POST` | `/api/nexus/webhook` | Crossmint webhook receiver (HMAC-SHA256 verified) |
 
-## Card Supply (Season 0)
+## Card Supply
 
-- **Total**: 100,000 cards from 102 base designs
+- **Season 1 tribe max**: 1,000,000 from 102 base designs (mint-on-demand after seed)
+- **Season 0 library**: unlimited no-tribe instances (does not consume tribe supply)
 - **Rarities**: Common, CommonHC, Uncommon, Uncommonhc, Rare, Epic, Legendary, StarterM
 
 ### Tribe Distribution

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-// Nexus Nemesis — Generate 100,000 Season 0 Cards
+// Nexus Nemesis — Generate Season 1 tribe cards (default 1,000,000)
 // Usage: node scripts/generate-cards.js
+// Optional: TARGET_TOTAL=100000 node scripts/generate-cards.js  (smaller seed)
 
 const fs = require('fs');
 const path = require('path');
@@ -9,15 +10,17 @@ const { v4: uuidv4 } = require('uuid');
 const {
   TRIBES,
   RARITY_SUPPLY,
+  SEASON1_MAX_SUPPLY,
+  SEASON_TRIBE,
   rollTribe,
   rollTraits,
   rollBonusAbilities,
 } = require('../server/lib/tribe-config');
 
-const TARGET_TOTAL = 100_000;
+const TARGET_TOTAL = parseInt(process.env.TARGET_TOTAL || String(SEASON1_MAX_SUPPLY), 10);
 const CSV_PATH = path.resolve(__dirname, '..', 'cards-base.csv');
-const OUT_JSON = path.resolve(__dirname, '..', 'output', 'nexus_cards_100k.json');
-const OUT_SQL = path.resolve(__dirname, '..', 'output', 'nexus_cards_100k.sql');
+const OUT_JSON = path.resolve(__dirname, '..', 'output', `nexus_cards_${TARGET_TOTAL}.json`);
+const OUT_SQL = path.resolve(__dirname, '..', 'output', `nexus_cards_${TARGET_TOTAL}.sql`);
 const OUT_STATS = path.resolve(__dirname, '..', 'output', 'generation_stats.json');
 
 // ── Load base cards ──────────────────────────────────────────────
@@ -67,8 +70,8 @@ if (totalPlanned !== TARGET_TOTAL) {
   }
 }
 
-// ── Generate all 100K cards ──────────────────────────────────────
-console.log('Generating cards...');
+// ── Generate Season 1 tribe cards ────────────────────────────────
+console.log(`Generating ${TARGET_TOTAL} Season 1 tribe cards...`);
 const allCards = [];
 let cardNumber = 1;
 const editionCounters = {}; // base_card_id -> current edition number
@@ -157,7 +160,7 @@ for (const baseCard of baseCards) {
       bonus_abilities: bonusAbilities,
       is_signature: isSignature,
       edition: `#${edition} of ${copies}`,
-      season: 'Season 0',
+      season: SEASON_TRIBE,
       mint_status: 'unminted',
     };
 
@@ -197,7 +200,7 @@ jsonStream.end();
 // SQL output (batched INSERT)
 console.log('Writing SQL...');
 const sqlStream = fs.createWriteStream(OUT_SQL);
-sqlStream.write('-- Nexus Nemesis Season 0 — 100K Card INSERT\n');
+sqlStream.write(`-- Nexus Nemesis ${SEASON_TRIBE} — ${TARGET_TOTAL} tribe card INSERT\n`);
 sqlStream.write('-- Auto-generated, do not edit\n\n');
 
 const BATCH_SIZE = 500;
